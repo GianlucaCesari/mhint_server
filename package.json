@@ -1,0 +1,18 @@
+{
+  "name": "mhint-api",
+  "version": "0.0.1",
+  "description": "Api for mhint application",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Loud s.r.l.",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^1.0.2",
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2",
+    "mongoose": "^4.9.8",
+    "unirest": "^0.5.1"
+  }
+}
