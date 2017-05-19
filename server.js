@@ -1,8 +1,10 @@
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
+var unirest = require('unirest');
 var mongoose = require('mongoose');
 var User = require('./models/user');
+var Contact = require('./models/contact');
 app.use(bodyParser.urlencoded({
     extended: true
 }));
@@ -78,6 +80,23 @@ app.post('/user', function(req, res) {
     if (req.body.password) {
         user.password = req.body.password;
     }
+    if (req.body.prefix) {
+        user.prefix = req.body.prefix;
+    }
+    if (req.body.tel_number) {
+        user.tel_number = req.body.tel_number;
+    }
+    if (req.body.contacts) {
+        var contactsArray = [];
+        for (var contact in req.body.contacts) {
+            var contact = new Contact()
+            contact.name = req.body.contacts.name;
+            contact.prefix = req.body.contacts.prefix;
+            contact.tel_number = req.body.contacts.tel_number;
+            contactsArray.push(contact);
+        }
+        user.contacts = contactsArray;
+    }
 
     user.save(function(err) {
         if (err) {
@@ -141,6 +160,15 @@ app.put('/user', function(req, res) {
             if (req.body.password) {
                 user.password = req.body.password;
             }
+            if (req.body.prefix) {
+                user.prefix = req.body.prefix;
+            }
+            if (req.body.tel_number) {
+                user.tel_number = req.body.tel_number;
+            }
+            if (req.body.contacts) {
+                user.contacts = req.body.contacts;
+            }
             user.save(function(err) {
                 if (err) {
                     console.error('ERROR!');
@@ -160,7 +188,6 @@ app.put('/user', function(req, res) {
         });
     }
 });
-
 
 
 //DELETE USER
@@ -185,6 +212,27 @@ app.delete('/user', function(req, res) {
         });
     }
 });
+
+// app.post('/random', function(req, res) {
+//     console.log("request:::::::::", req.body);
+//     unirest.get("https://spoonacular-recipe-food-nutrition-v1.p.mashape.com/recipes/random?limitLicense=false&number=1&tags=vegetarian%2Cdessert")
+//         .header("X-Mashape-Key", "C7zHMmU1oOmshSgRlGXXb0EEsmlrp1YA9akjsnqOtsmr8oWtcG")
+//         .header("Accept", "application/json")
+//         .end(function(result) {
+//             console.log("RESULT IS::::::" + result.body.instructions);
+//             var speech = result.body.instructions
+//             console.log("SPEECH IS" + speech);
+//             var bodyForApiAi = {
+//                 speech : speech,
+//                 displayText : speech
+//             }
+//             console.log("PER API AI::::", bodyForApiAi);
+//             res.json({
+//                 speech : "The "+result.body.recipes[0].dishTypes+" i found is called " + result.body.recipes[0].title + ". It's pretty easy : " + result.body.recipes[0].instructions,
+//                 displayText : "The "+result.body.recipes[0].dishTypes+" i found is called " + result.body.recipes[0].title + ". It's pretty easy : " + result.body.recipes[0].instructions
+//             });
+//         });
+// })
 
 app.listen(port);
 console.log('Server started on port ' + port);

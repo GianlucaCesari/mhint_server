@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var Contact = require('./contact');
 var UserSchema = new Schema({
     name: {
         required: true,
@@ -47,7 +48,11 @@ var UserSchema = new Schema({
         type: String,
         unique: true,
         required: true
-    }
+    },
+    prefix : String,
+    tel_number: Number
+    // ,
+    // contacts: [Contact]
 });
 
 module.exports = mongoose.model('User', UserSchema);
