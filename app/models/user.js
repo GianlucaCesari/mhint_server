@@ -50,9 +50,16 @@ var UserSchema = new Schema({
         required: true
     },
     prefix : String,
-    tel_number: Number
-    // ,
-    // contacts: [Contact]
+    tel_number: Number,
+    // contacts: [Contact],
+		created_at: {
+			type: Date,
+			default: Date.now()
+		},
+		updated_at: {
+			type: Date,
+			default: Date.now()
+		}
 });
 
 module.exports = mongoose.model('User', UserSchema);
