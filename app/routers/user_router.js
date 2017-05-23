@@ -1,11 +1,10 @@
 //  user_router.js
 
 //  require modules
-var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
 var express = require('express');
 
 //  require mongoose models
+var UserPosition = require('../models/user_position');
 var Contact = require('../models/contact');
 var User = require('../models/user');
 
@@ -18,6 +17,7 @@ router.use(function(req, res, next){
 });
 
 //  REST User
+//  GET ALL USERS
 router.route('/user').get(function(req, res) {
     User.find({}, function(err, users) {
         var userMap = {};
@@ -29,6 +29,18 @@ router.route('/user').get(function(req, res) {
     });
 });
 
+// GET USER By ID
+router.route('/user/:user_id').get(function(req, res) {
+	User.findById(req.params.user_id).populate('positions').exec(function(err, user) {
+		if (err) {
+			res.send(err);
+		} else {
+			res.json(user);
+		}
+	});
+});
+
+// POST USER
 router.route('/user').post(function(req, res) {
     var user = new User();
     if (req.body.name) {
@@ -104,6 +116,7 @@ router.route('/user').post(function(req, res) {
     });
 });
 
+//  PUT USER By MAIL
 router.route('/user').put(function(req, res) {
     if (req.body.mail) {
         User.findOne({
@@ -174,6 +187,7 @@ router.route('/user').put(function(req, res) {
     }
 });
 
+//  DELETE USER By MAIL
 router.route('/user').delete(function(req, res) {
     if (req.body.mail) {
         User.remove({
@@ -196,20 +210,49 @@ router.route('/user').delete(function(req, res) {
     }
 });
 
-//  FIND User
+//  FIND User by MAIL
 router.route('/user/find').post(function(req, res) {
     if (req.body.mail) {
-        User.find({
-            mail: req.body.mail
-        }, function(err, user) {
-            console.log(user);
-            res.send(user);
+        User.find({mail: req.body.mail}).populate('positions').exec(function(err, user) {
+					if (err) {
+						res.send(err);
+					} else {
+            res.json(user);
+					}
         });
     } else {
         res.json({
             message: "Cannot find user without identifier"
         });
     }
+});
+
+//  ADD POSITIONS User
+router.route('/userpositions/:user_id').post(function(req, res){
+	User.findById(req.params.user_id, function(err, user) {
+		if (err) {
+			res.send(err);
+		} else {
+			var UserPos = new UserPosition();
+			UserPos.lat = req.body.lat;
+			UserPos.long = req.body.long;
+			UserPos.save(function(err){
+				if (err) {
+					res.send(err);
+				} else {
+					user.positions = user.positions || [];
+					user.positions.push(UserPos);
+					user.save(function(err){
+						if (err) {
+							res.send(err);
+						} else {
+							res.json({status: 200, message: "OK"});
+						}
+					});
+				}
+			});
+		}
+	});
 });
 
 module.exports = router;

@@ -4,7 +4,7 @@ var Schema = mongoose.Schema;
 
 var UserPreferenceSchema = new Schema({
 	user_id: String,
-	food: { type: Schema.Types.ObjectId, ref: 'Food' },
+	food: {type: Schema.Types.ObjectId, ref: 'Food'},
 	type: String,
 	created_at: {
 		type: Date,

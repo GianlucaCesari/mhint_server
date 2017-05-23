@@ -1,6 +1,8 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var Contact = require('./contact');
+//var Contact = require('./contact');
+var UserPosition = require('./user_position');
+
 var UserSchema = new Schema({
     name: {
         required: true,
@@ -51,7 +53,8 @@ var UserSchema = new Schema({
     },
     prefix : String,
     tel_number: Number,
-    // contacts: [Contact],
+    contacts: [],
+		positions: [{type: Schema.Types.ObjectId, ref: 'UserPosition'}],
 		created_at: {
 			type: Date,
 			default: Date.now()

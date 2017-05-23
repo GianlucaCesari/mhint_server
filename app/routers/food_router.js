@@ -1,8 +1,6 @@
 //  food_router.js
 
 //  require modules
-var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
 var express = require('express');
 
 //  require mongoose models
