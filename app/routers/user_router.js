@@ -31,7 +31,7 @@ router.route('/user').get(function(req, res) {
 
 // GET USER By ID
 router.route('/user/:user_id').get(function(req, res) {
-	User.findById(req.params.user_id).populate('positions').exec(function(err, user) {
+	User.findById(req.params.user_id).populate({path:'positions', options:{limit:2, sort: {'created_at': -1} }}).exec(function(err, user) {
 		if (err) {
 			res.send(err);
 		} else {
