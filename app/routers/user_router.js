@@ -43,6 +43,7 @@ router.route('/user/:user_id').get(function(req, res) {
 // POST USER
 router.route('/user').post(function(req, res) {
     var user = new User();
+		console.log("body is: "+req.body);
     if (req.body.name) {
         user.name = req.body.name;
     }
