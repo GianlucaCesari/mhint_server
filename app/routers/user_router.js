@@ -228,31 +228,37 @@ router.route('/user/find').post(function(req, res) {
 });
 
 //  ADD POSITIONS User
-router.route('/userpositions/:user_id').post(function(req, res){
-	User.findById(req.params.user_id, function(err, user) {
-		if (err) {
-			res.send(err);
-		} else {
-			var UserPos = new UserPosition();
-			UserPos.lat = req.body.lat;
-			UserPos.long = req.body.long;
-			UserPos.save(function(err){
-				if (err) {
-					res.send(err);
-				} else {
-					user.positions = user.positions || [];
-					user.positions.push(UserPos);
-					user.save(function(err){
-						if (err) {
-							res.send(err);
-						} else {
-							res.json({status: 200, message: "OK"});
-						}
-					});
-				}
+router.route('/userpositions').post(function(req, res){
+	if (req.body.mail) {
+		User.findOne({mail: req.body.mail}).exec(function(err, user) {
+			if (err) {
+				res.send(err);
+			} else {
+				var UserPos = new UserPosition();
+				UserPos.lat = req.body.lat;
+				UserPos.long = req.body.long;
+				UserPos.save(function(err){
+					if (err) {
+						res.send(err);
+					} else {
+						user.positions = user.positions || [];
+						user.positions.push(UserPos);
+						user.save(function(err){
+							if (err) {
+								res.send(err);
+							} else {
+								res.json({status: 200, message: "OK"});
+							}
+						});
+					}
+				});
+			}
+		});
+	} else {
+			res.json({
+					message: "Cannot find user without identifier"
 			});
-		}
-	});
+	}
 });
 
 module.exports = router;
