@@ -228,6 +228,30 @@ router.route('/user/find').post(function(req, res) {
     }
 });
 
+//  VERIFY BOT User
+router.route('/botverify').post(function(req, res){
+	if (req.body.mail) {
+		User.findOne({mail: req.body.mail}).exec(function(err, user){
+			if (err) {
+				res.send(err);
+			} else {
+				user.telegram_chat_id = req.body.chat_id;
+				user.save(function(err){
+					if (err) {
+						res.send(err);
+					} else {
+						res.json({status: 200, message: "OK"})
+					}
+				});
+			}
+		});
+	} else {
+		res.json({
+				message: "Cannot find user without identifier"
+		});
+	}
+});
+
 //  ADD POSITIONS User
 router.route('/userpositions').post(function(req, res){
 	if (req.body.mail) {
