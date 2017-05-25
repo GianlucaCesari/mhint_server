@@ -6,6 +6,7 @@ var Nutriment = require('./nutriment');
 var FoodSchema = new Schema({
 	name: String,
 	category: Schema.Types.ObjectId,
+	img_url: String,
 	nutriments: [],
 	user_preference: [],
 	created_at: {

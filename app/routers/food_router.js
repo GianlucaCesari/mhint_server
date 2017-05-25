@@ -20,6 +20,7 @@ router.use(function(req, res, next){
 router.route('/foods').post(function(req, res){
 	var food = new Food();
 	food.name = req.body.name;
+	food.img_url = req.body.img_url;
 	Category.findOne({name: req.body.category}).exec(function(err, category){
 		if (category != null) {
 			food.category = category.id;
