@@ -3,7 +3,7 @@ var Food = require('./food');
 var Schema = mongoose.Schema;
 
 var UserPreferenceSchema = new Schema({
-	user_id: String,
+	user_mail: String,
 	food: {type: Schema.Types.ObjectId, ref: 'Food'},
 	type: String,
 	created_at: {

@@ -63,40 +63,80 @@ router.route('/foods/:food_id').get(function(req, res){
 	});
 });
 
-router.get('/', function(req, res){
-    res.json({ message: 'Food API v0.1' });
+router.route('/foodpreference').get(function(req, res){
+	if (req.query.mail) {
+		Food.find({user_preference: {$nin: [req.query.mail]}}).exec(function(err, foods){
+			if (err) {
+				console.log("ciao");
+				res.send(err);
+			} else {
+				console.log("ok");
+				res.json(foods);
+			}
+		})
+	} else {
+		res.json({
+				message: "Cannot modify user without identifier"
+		});
+	}
 });
 
-router.route('/userpreferences').post(function(req, res){
-	var user_preference = new UserPreference();
-	user_preference.user_id = req.body.user_id;
-	user_preference.food = req.body.food_id;
-	user_preference.type = req.body.type;
-	user_preference.save(function(err){
-		if (err) {
-			res.send(err);
-		} else {
-			res.json({message: "Created", value: user_preference});
-		}
-	});
-});
-
-router.route('/userpreferences/:user_id').get(function(req, res){
-	if (req.query.type != undefined) {
-		UserPreference.find({user_id: req.params.user_id, type: req.query.type}).populate('food').exec(function(err, user_preferences){
+router.route('/foodpreference').post(function(req, res){
+	if (req.body.mail) {
+		Food.findById(req.body.food_id).exec(function(err, food){
 			if (err) {
 				res.send(err);
 			} else {
-				res.json(user_preferences);
+				var user_preference = new UserPreference();
+				user_preference.user_mail = req.body.mail;
+				user_preference.food = req.body.food_id;
+				user_preference.type = req.body.type;
+				user_preference.save(function(err){
+					if (err) {
+						res.send(err);
+					} else {
+						food.user_preference = food.user_preference || [];
+						food.user_preference.push(req.body.mail);
+						food.save(function(err){
+							if (err) {
+								res.send(err);
+							} else {
+								res.json({message: "Created", value: user_preference});
+							}
+						});
+					}
+				});
 			}
 		});
 	} else {
-		UserPreference.find({user_id: req.params.user_id}).populate('food').exec(function(err, user_preferences){
-			if (err) {
-				res.send(err);
-			} else {
-				res.json(user_preferences);
-			}
+		res.json({
+				message: "Cannot modify user without identifier"
+		});
+	}
+});
+
+router.route('/fooduserpreferences').get(function(req, res){
+	if (req.query.mail) {
+		if (req.query.type != undefined) {
+			UserPreference.find({user_mail: req.query.mail, type: req.query.type}).populate('food').exec(function(err, user_preferences){
+				if (err) {
+					res.send(err);
+				} else {
+					res.json(user_preferences);
+				}
+			});
+		} else {
+			UserPreference.find({user_mail: req.query.mail}).populate('food').exec(function(err, user_preferences){
+				if (err) {
+					res.send(err);
+				} else {
+					res.json(user_preferences);
+				}
+			});
+		}
+	} else {
+		res.json({
+				message: "Cannot modify user without identifier"
 		});
 	}
 });

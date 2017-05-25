@@ -7,6 +7,7 @@ var FoodSchema = new Schema({
 	name: String,
 	category: Schema.Types.ObjectId,
 	nutriments: [],
+	user_preference: [],
 	created_at: {
 		type: Date,
 		default: Date.now()
