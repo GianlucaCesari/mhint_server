@@ -10,7 +10,8 @@ var UserSchema = new Schema({
     },
     birthday: Date,
 		telegram_chat_id: String,
-    imageProfile: String,
+    image_profile: String,
+		device_token: String,
     address: String,
     height: Number,
     weight: Number,
@@ -19,7 +20,7 @@ var UserSchema = new Schema({
         type: Number,
         max: 3
     },
-    sectionsEnabled: {
+    sections_enabled: {
         food: {
             type: Boolean,
             default: false
