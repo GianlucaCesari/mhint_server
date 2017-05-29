@@ -1,7 +1,8 @@
 var mongoose = require('mongoose');
+var random = require('mongoose-random');
 var Schema = mongoose.Schema;
 
-var Nutriment = require('./nutriment');
+var Nutriment = require('./nutrient');
 
 var FoodSchema = new Schema({
 	name: String,
@@ -18,5 +19,7 @@ var FoodSchema = new Schema({
 		default: Date.now()
 	}
 });
+
+FoodSchema.plugin(random, { path: 'r' });
 
 module.exports = mongoose.model('Food', FoodSchema);

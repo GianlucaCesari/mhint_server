@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var NutrimentSchema = new Schema({
+var NutrientSchema = new Schema({
 	name: String,
 	unit: String,
 	value: Number,
@@ -15,4 +15,4 @@ var NutrimentSchema = new Schema({
 	}
 });
 
-module.exports = mongoose.model('Nutriment', NutrimentSchema);
+module.exports = mongoose.model('Nutrient', NutrientSchema);

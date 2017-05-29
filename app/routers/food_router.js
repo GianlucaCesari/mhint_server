@@ -2,10 +2,11 @@
 
 //  require modules
 var express = require('express');
+var myToken = "0z1Po89d11REJ";
 
 //  require mongoose models
 var UserPreference = require('../models/user_preference');
-var Nutriment = require('../models/nutriment');
+var Nutrient = require('../models/nutrient');
 var Category = require('../models/category');
 var Food = require('../models/food');
 
@@ -20,30 +21,34 @@ router.use(function(req, res, next){
 });
 
 router.route('/foods').post(function(req, res){
-	var food = new Food();
-	food.name = req.body.name;
-	food.img_url = req.body.img_url;
-	Category.findOne({name: req.body.category}).exec(function(err, category){
-		if (category != null) {
-			food.category = category.id;
-		} else {
-			var newCat = new Category({name: req.body.category});
-			newCat.save();
-			food.category = newCat.id;
-		}
-		food.nutriments = [];
-		for (i = 0; i < req.body.nutriments.length; i++) {
-			var nutriment = new Nutriment(req.body.nutriments[i]);
-			food.nutriments[food.nutriments.length] = nutriment;
-		}
-		food.save(function(err){
-			if (err) {
-				res.send(err);
+	if (req.body.access_token == myToken) {
+		var food = new Food();
+		food.name = req.body.name;
+		food.img_url = req.body.img_url;
+		Category.findOne({name: req.body.category}).exec(function(err, category){
+			if (category != null) {
+				food.category = category.id;
 			} else {
-				res.json({message: "Created", value: food});
+				var newCat = new Category({name: req.body.category});
+				newCat.save();
+				food.category = newCat.id;
 			}
+			food.nutrients = [];
+			for (i = 0; i < req.body.nutrients.length; i++) {
+				var nutrient = new Nutrient(req.body.nutrients[i]);
+				food.nutrients[food.nutrients.length] = nutrient;
+			}
+			food.save(function(err){
+				if (err) {
+					res.send(err);
+				} else {
+					res.json({message: "Created", value: food});
+				}
+			});
 		});
-	});
+	} else {
+		res.json({message: "invalid access token"});
+	}
 });
 
 router.route('/foods').get(function(req, res){
@@ -68,7 +73,7 @@ router.route('/foods/:food_id').get(function(req, res){
 
 router.route('/foodpreference').get(function(req, res){
 	if (req.query.mail) {
-		Food.find({user_preference: {$nin: [req.query.mail]}}).limit(20).exec(function(err, foods){
+		Food.findRandom({user_preference: {$nin: [req.query.mail]}}).limit(20).exec(function(err, foods){
 			if (err) {
 				console.log("ciao");
 				res.send(err);
