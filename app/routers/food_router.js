@@ -73,7 +73,7 @@ router.route('/foods/:food_id').get(function(req, res){
 
 router.route('/foodpreference').get(function(req, res){
 	if (req.query.mail) {
-		Food.findRandom({user_preference: {$nin: [req.query.mail]}}).limit(20).exec(function(err, foods){
+		Food.findRandom({user_preference: {$nin: [req.query.mail]}}).limit(10).exec(function(err, foods){
 			if (err) {
 				console.log("ciao");
 				res.send(err);
