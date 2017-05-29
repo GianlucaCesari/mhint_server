@@ -2,13 +2,13 @@ var mongoose = require('mongoose');
 var random = require('mongoose-random');
 var Schema = mongoose.Schema;
 
-var Nutriment = require('./nutrient');
+var Nutrient = require('./nutrient');
 
 var FoodSchema = new Schema({
 	name: String,
 	category: Schema.Types.ObjectId,
 	img_url: String,
-	nutriments: [],
+	nutrients: [],
 	user_preference: [],
 	created_at: {
 		type: Date,
