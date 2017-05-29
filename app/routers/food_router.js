@@ -97,13 +97,16 @@ router.route('/foodpreference').post(function(req, res){
 				user_preference.save(function(err){
 					if (err) {
 						res.send(err);
+						console.log("no pref");
 					} else {
 						food.user_preference = food.user_preference || [];
 						food.user_preference.push(req.body.mail);
 						food.save(function(err){
 							if (err) {
 								res.send(err);
+								console.log("no save");
 							} else {
+								console.log("ok save");
 								res.json({message: "Created", value: user_preference});
 							}
 						});
