@@ -89,6 +89,7 @@ router.route('/foodpreference').post(function(req, res){
 		Food.findById(req.body.food_id).exec(function(err, food){
 			if (err) {
 				res.send(err);
+				console.log("no id");
 			} else {
 				var user_preference = new UserPreference();
 				user_preference.user_mail = req.body.mail;
