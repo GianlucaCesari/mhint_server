@@ -53,7 +53,7 @@ router.route('/user').post(function(req, res) {
         user.birthday = new Date(req.body.birthday);
     }
     if (req.body.imageProfile) {
-        user.imageProfile = req.body.imageProfile;
+        user.image_profile = req.body.imageProfile;
     }
 		if (req.body.device_token) {
 			user.device_token = req.body.device_token;
@@ -74,7 +74,7 @@ router.route('/user').post(function(req, res) {
         user.sex = req.body.sex;
     }
     if (req.body.sectionsEnabled) {
-        user.sectionsEnabled = req.body.sectionsEnabled;
+        user.sections_enabled = req.body.sectionsEnabled;
     }
     if (req.body.logins) {
         user.logins = req.body.logins;
