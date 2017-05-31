@@ -50,7 +50,7 @@ router.use(function(req, res, next){
 
 router.route('/test').post(function(req, res){
 	var point = req.body.point;
-	UserPosition.findOne({ position: { $geoNear: point }}).exec(function(err,pos){
+	UserPosition.findOne({ position: { $geoNear: {type: "Point", coordinates: point}}}).exec(function(err,pos){
 		if (err) {
 			res.send(err);
 		} else {
@@ -69,7 +69,7 @@ router.route('/need/:user_id').post(function(req, res){
 			res.send(err);
 		} else {
 			var UserPos = new UserPosition();
-			UserPos.position.coorinates = [parseFloat(req.body.position.lat), parseFloat(req.body.position.long)];
+			UserPos.position.coordinates = [parseFloat(req.body.position.lat), parseFloat(req.body.position.long)];
 			// UserPos.long = req.body.position.long;
 			UserPos.user_id = user.id;
 			UserPos.save(function(err){
