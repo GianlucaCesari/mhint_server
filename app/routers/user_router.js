@@ -257,6 +257,30 @@ router.route('/botverify').post(function(req, res){
 	}
 });
 
+//  ADD Device Token User
+router.route('/deviceverify').post(function(req, res){
+	if (req.body.mail) {
+		User.findOne({mail: req.body.mail}).exec(function(err, user){
+			if (err) {
+				res.send(err);
+			} else {
+				user.device_token = req.body.device_token;
+				user.save(function(err){
+					if (err) {
+						res.send(err);
+					} else {
+						res.json({status: 200, message: "OK"})
+					}
+				});
+			}
+		});
+	} else {
+		res.json({
+				message: "Cannot find user without identifier"
+		});
+	}
+});
+
 //  ADD POSITIONS User
 router.route('/userpositions').post(function(req, res){
 	if (req.body.mail) {
@@ -265,8 +289,9 @@ router.route('/userpositions').post(function(req, res){
 				res.send(err);
 			} else {
 				var UserPos = new UserPosition();
-				UserPos.lat = req.body.lat;
-				UserPos.long = req.body.long;
+				UserPos.position.coordinates = [parseFloat(req.body.lat), parseFloat(req.body.long)];
+				UserPos.user_id = user.id;
+				// UserPos.long = req.body.long;
 				UserPos.save(function(err){
 					if (err) {
 						res.send(err);
