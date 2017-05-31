@@ -8,7 +8,7 @@ var UserSchema = new Schema({
         required: true,
         type: String
     },
-    birthday: Date,
+    birthday: String,
 		telegram_chat_id: String,
     image_profile: String,
 		device_token: String,

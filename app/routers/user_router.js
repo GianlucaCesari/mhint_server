@@ -50,7 +50,8 @@ router.route('/user').post(function(req, res) {
         user.name = req.body.name;
     }
     if (req.body.birthday) {
-        user.birthday = new Date(req.body.birthday);
+        // user.birthday = new Date(req.body.birthday);
+				user.birthday = req.body.birthday;
     }
     if (req.body.imageProfile) {
         user.image_profile = req.body.imageProfile;
@@ -132,7 +133,8 @@ router.route('/user').put(function(req, res) {
                 user.name = req.body.name;
             }
             if (req.body.birthday) {
-                user.birthday = new Date(req.body.birthday);
+                // user.birthday = new Date(req.body.birthday);
+								user.birthday = req.body.birthday;
             }
             if (req.body.imageProfile) {
                 user.image_profile = req.body.imageProfile;
