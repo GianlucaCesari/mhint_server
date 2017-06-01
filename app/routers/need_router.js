@@ -14,7 +14,7 @@ var router = express.Router();
 
 var apnOptions = {
     token: {
-        key: "../certs/APNsAuthKey_JYW3R384JL.p8",
+        key: "./app/certs/APNsAuthKey_JYW3R384JL.p8",
         keyId: "JYW3R384JL",
         teamId: "L4KF22FNCY"
     },
