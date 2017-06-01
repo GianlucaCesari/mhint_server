@@ -100,34 +100,38 @@ router.route('/need').post(function(req, res){
 								res.send(err);
 							} else {
 								var UserNeedRequest = new NeedRequest();
-								UserNeedRequest.user = nearUser;
-								//INVIO NOTIFICA
-								var note = new apn.Notification();
-								var deviceToken = nearUser.device_token;
+								UserNeedRequest.user_receiver = nearUser;
+								UserNeedRequest.user_sender = user;
+								UserNeedRequest.save(function(err){
+									if (err) {
+										res.send(err);
+									} else {
+										//INVIO NOTIFICA
+										var note = new apn.Notification();
+										var deviceToken = nearUser.device_token;
 
-    						note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
-    						note.badge = 1;
-    						note.sound = "ping.aiff";
-    						note.alert = user.name + " needs: " + UserNeed.name + "!\nWill you help him?";
-    						note.payload = {
-        					'messageFrom': 'John Appleseed'
-    						};
-    						note.topic = "com.gianlucacesari.Mhint";
-								console.log(deviceToken);
-    						apnProvider.send(note, deviceToken).then((result) => {
-        					// see documentation for an explanation of result
-        					// res.send("ok")
-									console.log(JSON.stringify(result));
-									UserNeed.user_requests = UserNeed.user_requests || [];
-									UserNeed.user_requests.push(UserNeedRequest);
-									UserNeed.save(function(err){
-										if (err) {
-											res.send(err);
-										} else {
-											res.json({status: 200, message: "OK"});
-										}
-									});
-    						});
+		    						note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
+		    						note.badge = 1;
+		    						note.sound = "ping.aiff";
+		    						note.alert = "Hey " + nearUser.name + ",\n" + user.name + " needs: " + UserNeed.name + "!\nWill you help him?";
+		    						note.payload = {
+		        					'messageFrom': 'John Appleseed'
+		    						};
+		    						note.topic = "com.gianlucacesari.Mhint";
+		    						apnProvider.send(note, deviceToken).then((result) => {
+											console.log("notification: "+JSON.stringify(result));
+											UserNeed.user_requests = UserNeed.user_requests || [];
+											UserNeed.user_requests.push(UserNeedRequest);
+											UserNeed.save(function(err){
+												if (err) {
+													res.send(err);
+												} else {
+													res.json({status: 200, message: "OK"});
+												}
+											});
+		    						});
+									}
+								});
 							}
 						});
 					}
@@ -139,6 +143,47 @@ router.route('/need').post(function(req, res){
 				message: "Cannot modify user without identifier"
 		});
 	}
+});
+
+router.route('/needresponse').post(function(req, res){
+	NeedRequest.findById(req.body.request_id).exec(function(err, needrequest){
+		if (err) {
+			res.send(err);
+		} else {
+			needrequest.accept = req.body.accept;
+			User.findById(needrequest.user_sender).exec(function(err, user){
+				if (err) {
+					res.send(err);
+				} else {
+					var note = new apn.Notification();
+					var deviceToken = user.device_token;
+
+					note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
+					note.badge = 1;
+					note.sound = "ping.aiff";
+					if (req.body.accept) {
+						note.alert = user.name + " someone accepted your request!";
+					} else {
+						note.alert = user.name + " your request was not accepted!";
+					}
+					note.payload = {
+						'messageFrom': 'John Appleseed'
+					};
+					note.topic = "com.gianlucacesari.Mhint";
+					apnProvider.send(note, deviceToken).then((result) => {
+						console.log("notification: "+JSON.stringify(result));
+						needrequest.save(function(err){
+							if (err) {
+								res.send(err);
+							} else {
+								res.json(needrequest);
+							}
+						});
+					});
+				}
+			});
+		}
+	})
 });
 
 router.route('/needs').get(function(req, res){
