@@ -19,7 +19,7 @@ var apnOptions = {
         keyId: "JYW3R384JL",
         teamId: "L4KF22FNCY"
     },
-    production: false
+    production: true
 };
 
 var apnProvider = new apn.Provider(apnOptions);
