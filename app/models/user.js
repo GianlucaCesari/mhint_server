@@ -56,7 +56,7 @@ var UserSchema = new Schema({
     prefix : String,
     tel_number: Number,
     contacts: [],
-		positions: [{type: Schema.Types.ObjectId, ref: 'UserPosition'}],
+		last_position: {type: Schema.Types.ObjectId, ref: 'UserPosition'},
 		created_at: {
 			type: Date,
 			default: Date.now()

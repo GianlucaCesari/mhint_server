@@ -2,6 +2,7 @@
 
 //  require modules
 var express = require('express');
+var apn = require('apn');
 
 //  require mongoose models
 var UserPosition = require('../models/user_position');
@@ -10,6 +11,17 @@ var User = require('../models/user');
 
 //  router init
 var router = express.Router();
+
+var apnOptions = {
+    token: {
+        key: "../certs/APNsAuthKey_JYW3R384JL.p8",
+        keyId: "JYW3R384JL",
+        teamId: "L4KF22FNCY"
+    },
+    production: false
+};
+
+var apnProvider = new apn.Provider(apnOptions);
 
 function distanceKM(lat1, lon1, lat2, lon2, unit) {
 	var radlat1 = Math.PI * lat1/180
@@ -50,57 +62,117 @@ router.use(function(req, res, next){
 
 router.route('/test').post(function(req, res){
 	var point = req.body.point;
-	UserPosition.findOne({ position: { $geoNear: {type: "Point", coordinates: point}}}).exec(function(err,pos){
+	UserPosition.findOne({ is_last: true, position: { $geoNear: {type: "Point", coordinates: point}}}).exec(function(err,pos){
 		if (err) {
 			res.send(err);
 		} else {
-			res.json(pos);
-		}
-	});
-	// var point2 = req.body.point2;
-	// var distance = getDistance(point1,point2);
-	// var distance = distanceKM(point1.lat, point1.long, point2.lat, point2.long, "K");
-	// res.json({point1: point1, point2: point2, distance: distance});
-});
-
-router.route('/need/:user_id').post(function(req, res){
-	User.findById(req.params.user_id).exec(function(err, user){
-		if (err) {
-			res.send(err);
-		} else {
-			var UserPos = new UserPosition();
-			UserPos.position.coordinates = [parseFloat(req.body.position.lat), parseFloat(req.body.position.long)];
-			// UserPos.long = req.body.position.long;
-			UserPos.user_id = user.id;
-			UserPos.save(function(err){
+			User.findById(pos.user_id).exec(function(err, user){
 				if (err) {
 					res.send(err);
 				} else {
-					user.positions = user.positions || [];
-					user.positions.push(UserPos);
-					user.save(function(err){
-						if (err) {
-							res.send(err);
-						} else {
-							var need = new Need();
-							need.user = user;
-							need.request_position = UserPos;
-							need.name = req.body.name;
-							need.description = req.body.description;
-							need.type = req.body.type;
-							need.save(function(err){
-								if (err) {
-									res.send(err);
-								} else {
-									res.json(need);
-								}
-							});
-						}
-					})
+					res.json(user);
 				}
 			});
 		}
 	});
+});
+
+router.route('/need').post(function(req, res){
+	if (req.body.mail) {
+		User.findOne({mail: req.body.mail}).exec(function(err,user){
+			if (err) {
+				res.send(err);
+			} else {
+				var UserNeed = new Need();
+				UserNeed.user = user;
+				UserNeed.name = req.body.name;
+				UserNeed.description = req.body.description;
+				UserNeed.type = req.body.type;
+				var needCoordinates = [parseFloat(req.body.position.lat), parseFloat(req.body.position.long)];
+				UserNeed.request_position.coordinates = needCoordinates;
+				UserPosition.findOne({ is_last: true, position: { $geoNear: {type: "Point", coordinates: needCoordinates}}}).exec(function(err,pos){
+					if (err) {
+						res.send(err);
+					} else {
+						User.findById(pos.user_id).exec(function(err, nearUser){
+							if (err) {
+								res.send(err);
+							} else {
+								var UserNeedRequest = new NeedRequest();
+								UserNeedRequest.user = nearUser;
+								//INVIO NOTIFICA
+								var note = new apn.Notification();
+								var deviceToken = nearUser.device_token;
+
+    						note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
+    						note.badge = 3;
+    						note.sound = "ping.aiff";
+    						note.alert = req.body.body;
+    						note.payload = {
+        					'messageFrom': 'John Appleseed'
+    						};
+    						note.topic = "com.gianlucacesari.Mhint";
+    						apnProvider.send(note, deviceToken).then((result) => {
+        					// see documentation for an explanation of result
+        					// res.send("ok")
+									UserNeed.user_requests = UserNeed.user_requests || [];
+									UserNeed.user_requests.push(UserNeedRequest);
+									UserNeed.save(function(err){
+										if (err) {
+											res.send(err);
+										} else {
+											res.json({status: 200, message: "OK"});
+										}
+									});
+    						});
+							}
+						});
+					}
+				});
+			}
+		});
+	} else {
+		res.json({
+				message: "Cannot modify user without identifier"
+		});
+	}
+	// User.findById(req.params.user_id).exec(function(err, user){
+	// 	if (err) {
+	// 		res.send(err);
+	// 	} else {
+	// 		var UserPos = new UserPosition();
+	// 		UserPos.position.coordinates = [parseFloat(req.body.position.lat), parseFloat(req.body.position.long)];
+	// 		// UserPos.long = req.body.position.long;
+	// 		UserPos.user_id = user.id;
+	// 		UserPos.save(function(err){
+	// 			if (err) {
+	// 				res.send(err);
+	// 			} else {
+	// 				user.positions = user.positions || [];
+	// 				user.positions.push(UserPos);
+	// 				user.save(function(err){
+	// 					if (err) {
+	// 						res.send(err);
+	// 					} else {
+	// 						var need = new Need();
+	// 						need.user = user;
+	// 						need.request_position = UserPos;
+	// 						need.name = req.body.name;
+	// 						need.description = req.body.description;
+	// 						need.type = req.body.type;
+	// 						need.save(function(err){
+	// 							if (err) {
+	// 								res.send(err);
+	// 							} else {
+	// 								res.json(need);
+	// 							}
+	// 						});
+	// 					}
+	// 				})
+	// 			}
+	// 		});
+	// 	}
+	// });
 });
 
 router.route('/needs').get(function(req, res){

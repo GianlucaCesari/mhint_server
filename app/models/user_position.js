@@ -14,6 +14,7 @@ var UserPositionSchema = new Schema({
     },
 	},
 	user_id: {type: Schema.Types.ObjectId, ref: 'User'},
+	is_last: {type: Boolean, default: true},
 	created_at: {
 		type: Date,
 		default: Date.now()

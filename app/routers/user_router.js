@@ -293,20 +293,50 @@ router.route('/userpositions').post(function(req, res){
 				var UserPos = new UserPosition();
 				UserPos.position.coordinates = [parseFloat(req.body.lat), parseFloat(req.body.long)];
 				UserPos.user_id = user.id;
-				// UserPos.long = req.body.long;
-				UserPos.save(function(err){
+				UserPosition.findOne({user_id: user.id, is_last: true}).exec(function(err, pos){
 					if (err) {
 						res.send(err);
 					} else {
-						user.positions = user.positions || [];
-						user.positions.push(UserPos);
-						user.save(function(err){
-							if (err) {
-								res.send(err);
-							} else {
-								res.json({status: 200, message: "OK"});
-							}
-						});
+						if (pos) {
+							pos.is_last = false;
+							pos.save(function(err){
+								if (err) {
+									res.send(err);
+								} else {
+									UserPos.save(function(err){
+										if (err) {
+											res.send(err);
+										} else {
+											// user.positions = user.positions || [];
+											user.last_position = UserPos;
+											user.save(function(err){
+												if (err) {
+													res.send(err);
+												} else {
+													res.json({status: 200, message: "OK"});
+												}
+											});
+										}
+									});
+								}
+							});
+						} else {
+							UserPos.save(function(err){
+								if (err) {
+									res.send(err);
+								} else {
+									// user.positions = user.positions || [];
+									user.last_position = UserPos;
+									user.save(function(err){
+										if (err) {
+											res.send(err);
+										} else {
+											res.json({status: 200, message: "OK"});
+										}
+									});
+								}
+							});
+						}
 					}
 				});
 			}
