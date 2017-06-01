@@ -2,7 +2,7 @@
 
 //  require modules
 var express = require('express');
-var apn = require('apn');
+// var apn = require('apn');
 
 //  require mongoose models
 var UserPosition = require('../models/user_position');
@@ -12,16 +12,16 @@ var User = require('../models/user');
 //  router init
 var router = express.Router();
 
-var apnOptions = {
-    token: {
-        key: "./app/certs/APNsAuthKey_JYW3R384JL.p8",
-        keyId: "JYW3R384JL",
-        teamId: "L4KF22FNCY"
-    },
-    production: false
-};
-
-var apnProvider = new apn.Provider(apnOptions);
+// var apnOptions = {
+//     token: {
+//         key: "./app/certs/APNsAuthKey_JYW3R384JL.p8",
+//         keyId: "JYW3R384JL",
+//         teamId: "L4KF22FNCY"
+//     },
+//     production: false
+// };
+//
+// var apnProvider = new apn.Provider(apnOptions);
 
 function distanceKM(lat1, lon1, lat2, lon2, unit) {
 	var radlat1 = Math.PI * lat1/180
@@ -101,30 +101,30 @@ router.route('/need').post(function(req, res){
 								var UserNeedRequest = new NeedRequest();
 								UserNeedRequest.user = nearUser;
 								//INVIO NOTIFICA
-								var note = new apn.Notification();
-								var deviceToken = nearUser.device_token;
-
-    						note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
-    						note.badge = 3;
-    						note.sound = "ping.aiff";
-    						note.alert = req.body.body;
-    						note.payload = {
-        					'messageFrom': 'John Appleseed'
-    						};
-    						note.topic = "com.gianlucacesari.Mhint";
-    						apnProvider.send(note, deviceToken).then((result) => {
-        					// see documentation for an explanation of result
-        					// res.send("ok")
-									UserNeed.user_requests = UserNeed.user_requests || [];
-									UserNeed.user_requests.push(UserNeedRequest);
-									UserNeed.save(function(err){
-										if (err) {
-											res.send(err);
-										} else {
-											res.json({status: 200, message: "OK"});
-										}
-									});
-    						});
+								// var note = new apn.Notification();
+								// var deviceToken = nearUser.device_token;
+								//
+    						// note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
+    						// note.badge = 3;
+    						// note.sound = "ping.aiff";
+    						// note.alert = req.body.body;
+    						// note.payload = {
+        				// 	'messageFrom': 'John Appleseed'
+    						// };
+    						// note.topic = "com.gianlucacesari.Mhint";
+    						// apnProvider.send(note, deviceToken).then((result) => {
+        				// 	// see documentation for an explanation of result
+        				// 	// res.send("ok")
+								// 	UserNeed.user_requests = UserNeed.user_requests || [];
+								// 	UserNeed.user_requests.push(UserNeedRequest);
+								// 	UserNeed.save(function(err){
+								// 		if (err) {
+								// 			res.send(err);
+								// 		} else {
+								// 			res.json({status: 200, message: "OK"});
+								// 		}
+								// 	});
+    						// });
 							}
 						});
 					}
