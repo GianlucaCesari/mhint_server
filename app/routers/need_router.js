@@ -167,7 +167,8 @@ router.route('/needresponse').post(function(req, res){
 						note.alert = user.name + " your request was not accepted!";
 					}
 					note.payload = {
-						'messageFrom': 'John Appleseed'
+						'user': user.name,
+						'text' : 'Someone accepted your request'
 					};
 					note.topic = "com.gianlucacesari.Mhint";
 					apnProvider.send(note, deviceToken).then((result) => {
