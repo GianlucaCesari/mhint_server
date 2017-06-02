@@ -17,7 +17,7 @@ var apnOptions = {
     token: {
         key: "./app/certs/APNsAuthKey_JYW3R384JL.p8",
         keyId: "JYW3R384JL",
-        teamId: "L4KF22FNCY"
+        teamId: "TYT542W43K"
     },
     production: true
 };
