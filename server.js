@@ -35,6 +35,10 @@ app.use(food_router);
 var need_router = require('./app/routers/need_router');
 app.use(need_router);
 
+//  Shopping Router
+var shopping_router = require('./app/routers/shopping_router');
+app.use(shopping_router);
+
 //  start server
 app.listen(port);
 console.log('Server started on port ' + port);
