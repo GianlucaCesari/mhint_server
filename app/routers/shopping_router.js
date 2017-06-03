@@ -69,6 +69,25 @@ router.route('/shoppinglist').post(function(req,res){
 	}
 });
 
+// complete list
+router.route('/listcomplete').post(function(req,res){
+	ShoppingList.findById(req.body.list_id).exec(function(err, list){
+		if (err) {
+			res.send(err);
+		} else {
+			list.completed = true;
+			list.completed_at = new Date();
+			list.save(function(err){
+				if (err) {
+					res.send(err);
+				} else {
+					res.json({status: 200, message: "OK"});
+				}
+			});
+		}
+	});
+});
+
 // complete item
 router.route('/itemchecked').post(function(req,res){
 	ShoppingItem.findById(req.body.item_id).exec(function(err, item){
