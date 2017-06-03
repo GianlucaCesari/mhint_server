@@ -69,4 +69,45 @@ router.route('/shoppinglist').post(function(req,res){
 	}
 });
 
+// complete item
+router.route('/itemchecked').post(function(req,res){
+	ShoppingItem.findById(req.body.item_id).exec(function(err, item){
+		if (err) {
+			res.send(err);
+		} else {
+			item.checked = req.body.checked;
+			item.save(function(err){
+				if (err) {
+					res.send(err);
+				} else {
+					res.json(item);
+				}
+			});
+		}
+	});
+});
+
+// add item
+router.route('/additem').post(function(req,res){
+	ShoppingList.findById(req.body.list_id).exec(function(err, list){
+		if (err) {
+			res.send(err);
+		} else {
+			var item = new ShoppingItem();
+			item.name = req.body.item.name;
+			item.value = req.body.item.value;
+			item.unit = req.body.item.unit;
+			item.save();
+			list.items.push(item);
+			list.save(function(err){
+				if (err) {
+					res.send(err);
+				} else {
+					res.json(list);
+				}
+			});
+		}
+	});
+});
+
 module.exports = router;
