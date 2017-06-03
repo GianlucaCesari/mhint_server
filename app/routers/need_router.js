@@ -113,7 +113,7 @@ router.route('/need').post(function(req, res){
 		    						note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
 		    						note.badge = 1;
 		    						note.sound = "ping.aiff";
-		    						note.alert = "Hey " + nearUser.name + ",\n" + user.name + " needs: " + UserNeed.name + "!\nWill you help him?";
+		    						note.alert = "Hey " + nearUser.full_name + ",\n" + user.full_name + " needs: " + UserNeed.name + "!\nWill you help him?";
 		    						note.payload = {
 		        					'messageFrom': 'John Appleseed'
 		    						};
@@ -162,12 +162,12 @@ router.route('/needresponse').post(function(req, res){
 					note.badge = 1;
 					note.sound = "ping.aiff";
 					if (req.body.accept) {
-						note.alert = user.name + " someone accepted your request!";
+						note.alert = user.full_name + " someone accepted your request!";
 					} else {
-						note.alert = user.name + " your request was not accepted!";
+						note.alert = user.full_name + " your request was not accepted!";
 					}
 					note.payload = {
-						'user': user.name,
+						'user': user.full_name,
 						'text' : 'Someone accepted your request'
 					};
 					note.topic = "com.gianlucacesari.Mhint";
