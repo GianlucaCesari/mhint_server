@@ -3,7 +3,7 @@ var Schema = mongoose.Schema;
 
 var ShoppingItemSchema = new Schema({
 	name: String,
-	value: Number,
+	value: String,
 	unit: String,
 	checked: {
 		type: Boolean,

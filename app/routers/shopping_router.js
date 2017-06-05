@@ -48,8 +48,12 @@ router.route('/shoppinglist').post(function(req,res){
 				for (i = 0; i < req.body.items.length; i++) {
 					var shoppingItem = new ShoppingItem();
 					shoppingItem.name = req.body.items[i].name;
-					shoppingItem.value = req.body.items[i].value;
-					shoppingItem.unit = req.body.items[i].unit;
+					if (eq.body.items[i].value) {
+						shoppingItem.value = req.body.items[i].value;
+					}
+					if (req.body.items[i].unit) {
+						shoppingItem.unit = req.body.items[i].unit;
+					}
 					shoppingItem.save();
 					shoppingList.items.push(shoppingItem);
 				}
@@ -114,8 +118,12 @@ router.route('/additem').post(function(req,res){
 		} else {
 			var item = new ShoppingItem();
 			item.name = req.body.item.name;
-			item.value = req.body.item.value;
-			item.unit = req.body.item.unit;
+			if (req.body.item.value) {
+				item.value = req.body.item.value;
+			}
+			if (req.body.item.unit) {
+				item.unit = req.body.item.unit;
+			}
 			item.save();
 			list.items.push(item);
 			list.save(function(err){
