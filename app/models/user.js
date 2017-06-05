@@ -53,7 +53,7 @@ var UserSchema = new Schema({
         required: true
     },
     prefix : String,
-    tel_number: Number,
+    tel_number: String,
     contacts: [],
 		last_position: {type: Schema.Types.ObjectId, ref: 'UserPosition'},
 		created_at: {

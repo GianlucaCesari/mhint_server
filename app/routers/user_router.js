@@ -195,7 +195,7 @@ router.route('/user').put(function(req, res) {
                         mail: req.body.mail
                     }, function(err, user) {
                         console.log(user);
-                        res.send(user);
+                        res.json(user);
                     });
                 }
             });
