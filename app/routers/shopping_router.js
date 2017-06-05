@@ -48,7 +48,7 @@ router.route('/shoppinglist').post(function(req,res){
 				for (i = 0; i < req.body.items.length; i++) {
 					var shoppingItem = new ShoppingItem();
 					shoppingItem.name = req.body.items[i].name;
-					if (eq.body.items[i].value) {
+					if (req.body.items[i].value) {
 						shoppingItem.value = req.body.items[i].value;
 					}
 					if (req.body.items[i].unit) {
