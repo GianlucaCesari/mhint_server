@@ -18,7 +18,7 @@ router.route('/shoppinglist').get(function(req,res){
 			if (err) {
 				res.send(err);
 			} else {
-				ShoppingList.findOne({user: user._id}, {}, { sort: { 'created_at' : -1 } }).populate('items').exec(function(err,list){
+				ShoppingList.findOne({user: user._id, completed: false}, {}, { sort: { 'created_at' : -1 } }).populate('items').exec(function(err,list){
 					if (err) {
 						res.send(err);
 					} else {
