@@ -189,16 +189,17 @@ router.route('/getallergens').get(function(req, res) {
 
 router.route('/postallergens').post(function(req, res) {
 	if (req.body.access_token == myToken) {
-		var allergenic = new Allergenic();
-		allergenic.name = req.body.name;
-		allergenic.img_url = req.body.img_url;
-		allergenic.save(function(err){
-			if (err) {
-				res.send(err);
-			} else {
-				res.json({status: 200, message: 'OK'});
-			}
-		});
+		for (i = 0; i < req.body.allergens.length; i++) {
+			var allergenic = new Allergenic();
+			allergenic.name = req.body.allergens[i].name;
+			allergenic.img_url = req.body.allergens[i].img_url;
+			allergenic.save(function(err){
+				if (err) {
+					res.send(err);
+				}
+			});
+			res.json({status: 200, message: 'OK'});
+		}
 	} else {
 		res.json({
       message: "invalid access token"
