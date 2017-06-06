@@ -362,8 +362,9 @@ router.route('/userpositions').post(function(req, res){
 
 // API AI
 router.route('/apiairoute').post(function(req,res){
-	console.log('API AI');
-	console.log(req);
+	// console.log('API AI');
+	// console.log(req.route.path);
+	// console.log(req);
 	res.json(req.body);
 });
 

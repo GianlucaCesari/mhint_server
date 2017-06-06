@@ -10,6 +10,7 @@ var Allergenic = require('../models/allergenic');
 var Nutrient = require('../models/nutrient');
 var Category = require('../models/category');
 var Food = require('../models/food');
+var Diet = require('../models/diet');
 
 //  router init
 var router = express.Router();
@@ -209,7 +210,7 @@ router.route('/postallergens').post(function(req, res) {
 
 router.route('/userallergens').get(function(req, res){
 	if (req.query.mail) {
-		User.find({mail: req.query.mail}).populate('allergens').exec(function(err, user){
+		User.findOne({mail: req.query.mail}).populate('allergens').exec(function(err, user){
 			if (err) {
 				res.send(err);
 			} else {
@@ -225,7 +226,7 @@ router.route('/userallergens').get(function(req, res){
 
 router.route('/userallergens').post(function(req, res){
 	if (req.body.mail) {
-		User.find({mail: req.body.mail}).exec(function(err, user){
+		User.findOne({mail: req.body.mail}).exec(function(err, user){
 			if (err) {
 				res.send(err);
 			} else {
@@ -243,6 +244,77 @@ router.route('/userallergens').post(function(req, res){
 		res.json({
       message: "Cannot modify user without identifier"
     });
+	}
+});
+
+// DIETS
+
+router.route('/getdiet').get(function(req, res){
+	Diet.find({}).exec(function(err, diets){
+		if (err) {
+			res.send(err);
+		} else {
+			res.json(diets);
+		}
+	});
+});
+
+router.route('/postdiet').post(function(req, res){
+	if (req.body.access_token == myToken) {
+		for (i = 0; i < req.body.diets.length; i++) {
+			var diet = new Diet();
+			diet.name = req.body.diets[i].name;
+			diet.img_url = req.body.diets[i].img_url;
+			diet.save(function(err){
+				if (err) {
+					res.send(err);
+				}
+			});
+		}
+		res.json({status: 200, message: 'OK'});
+	} else {
+		res.json({
+      message: "invalid access token"
+    });
+	}
+});
+
+router.route('/userdiet').get(function(req, res){
+	if (req.query.mail) {
+		User.findOne({mail: req.query.mail}).populate('diet').exec(function(err, user){
+			if (err) {
+				res.send(err);
+			} else {
+				res.json(user.diet);
+			}
+		});
+	} else {
+		res.json({
+      message: "Cannot modify user without identifier"
+    });
+	}
+});
+
+router.route('/userdiet').post(function(req, res){
+	if (req.body.mail) {
+		User.findOne({mail: req.body.mail}).exec(function(err, user){
+			if (err) {
+				res.send(err);
+			} else {
+				user.diet = req.body.diet_id;
+				user.save(function(err){
+					if (err) {
+						res.send(err);
+					} else {
+						res.json({status: 200, message: 'OK'});
+					}
+				});
+			}
+		});
+	} else {
+		res.json({
+			message: "Cannot modify user without identifier"
+		});
 	}
 });
 
