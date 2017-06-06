@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 //var Contact = require('./contact');
 var UserPosition = require('./user_position');
+var Allergenic = require('./allergenic');
 
 var UserSchema = new Schema({
     first_name: String,
@@ -54,6 +55,7 @@ var UserSchema = new Schema({
     },
     prefix : String,
     tel_number: String,
+		allergens: [{type: Schema.Types.ObjectId, ref: 'Allergenic'}],
     contacts: [],
 		last_position: {type: Schema.Types.ObjectId, ref: 'UserPosition'},
 		created_at: {
