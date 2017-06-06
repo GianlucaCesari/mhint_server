@@ -230,7 +230,16 @@ router.route('/userallergens').post(function(req, res){
 			if (err) {
 				res.send(err);
 			} else {
-				user.allergens = req.body.allergens;
+				user.allergens = [];
+				for (i = 0; i < req.body.allergens.length; i++) {
+					Allergenic.findById(req.body.allergens[i]).exec(function(err, all){
+						if (err) {
+							res.send(err);
+						} else {
+							user.allergens.push(all);
+						}
+					});
+				}
 				user.save(function(err){
 					if (err) {
 						res.send(err);
@@ -301,12 +310,18 @@ router.route('/userdiet').post(function(req, res){
 			if (err) {
 				res.send(err);
 			} else {
-				user.diet = req.body.diet_id;
-				user.save(function(err){
+				Diet.findById(req.body.diet_id).exec(function(err, diet){
 					if (err) {
 						res.send(err);
 					} else {
-						res.json({status: 200, message: 'OK'});
+						user.diet = diet;
+						user.save(function(err){
+							if (err) {
+								res.send(err);
+							} else {
+								res.json({status: 200, message: 'OK'});
+							}
+						});
 					}
 				});
 			}
