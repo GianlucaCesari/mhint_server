@@ -264,6 +264,23 @@ router.route('/needs').get(function(req, res) {
   }
 });
 
+router.route('/needcomplete').post(function(req, res){
+	Need.findById(req.body.request_id).exec(function(err, need){
+		if (err) {
+			res.send(err);
+		} else {
+			need.status = "completed";
+			need.save(function(err){
+				if (err) {
+					res.send(err);
+				} else {
+					res.json({status: 200, message: "OK"});
+				}
+			});
+		}
+	});
+});
+
 // router.route('/needs').get(function(req, res){
 // 	Need.find().populate('user').populate('target_users').populate('request_position').exec(function(err, needs){
 // 		if (err) {
