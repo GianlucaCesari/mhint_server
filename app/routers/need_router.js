@@ -22,7 +22,17 @@ var apnOptions = {
     production: false
 };
 
+var apnOptions2 = {
+    token: {
+        key: "./app/certs/APNsAuthKey_JYW3R384JL.p8",
+        keyId: "JYW3R384JL",
+        teamId: "L4KF22FNCY"
+    },
+    production: true
+};
+
 var apnProvider = new apn.Provider(apnOptions);
+var apnProvider2 = new apn.Provider(apnOptions2);
 
 function distanceKM(lat1, lon1, lat2, lon2, unit) {
 	var radlat1 = Math.PI * lat1/180
@@ -119,10 +129,23 @@ router.route('/need').post(function(req, res){
 												if (err) {
 													res.send(err);
 												} else {
-													res.json({status: 200, message: "OK"});
+													// res.json({status: 200, message: "OK"});
 												}
 											});
 		    						});
+										apnProvider2.send(note, deviceToken).then((result) => {
+											console.log("notification: "+JSON.stringify(result));
+											UserNeed.user_requests = UserNeed.user_requests || [];
+											UserNeed.user_requests.push(UserNeedRequest);
+											UserNeed.save(function(err){
+												if (err) {
+													res.send(err);
+												} else {
+													// res.json({status: 200, message: "OK"});
+												}
+											});
+		    						});
+										res.json({status: 200, message: "OK"});
 									}
 								});
 							}
@@ -170,10 +193,21 @@ router.route('/needresponse').post(function(req, res){
 							if (err) {
 								res.send(err);
 							} else {
-								res.json(needrequest);
+								// res.json(needrequest);
 							}
 						});
 					});
+					apnProvider2.send(note, deviceToken).then((result) => {
+						console.log("notification: "+JSON.stringify(result));
+						needrequest.save(function(err){
+							if (err) {
+								res.send(err);
+							} else {
+								// res.json(needrequest);
+							}
+						});
+					});
+					res.json(needrequest);
 				}
 			});
 		}
