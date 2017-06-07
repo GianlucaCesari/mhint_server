@@ -66,16 +66,9 @@ router.route('/userallergens').post(function(req, res){
 			if (err) {
 				res.send(err);
 			} else {
+				var alls = [];
 				user.allergens = [];
-				for (i = 0; i < req.body.allergens.length; i++) {
-					Allergenic.findById(req.body.allergens[i]).exec(function(err, all){
-						if (err) {
-							res.send(err);
-						} else {
-							user.allergens.push(all);
-						}
-					});
-				}
+				user.allergens = req.body.allergens;
 				user.save(function(err){
 					if (err) {
 						res.send(err);
@@ -94,7 +87,7 @@ router.route('/userallergens').post(function(req, res){
 
 // DIETS
 
-router.route('/getdiet').get(function(req, res){
+router.route('/getdiets').get(function(req, res){
 	Diet.find({}).exec(function(err, diets){
 		if (err) {
 			res.send(err);
@@ -104,7 +97,7 @@ router.route('/getdiet').get(function(req, res){
 	});
 });
 
-router.route('/postdiet').post(function(req, res){
+router.route('/postdiets').post(function(req, res){
 	if (req.body.access_token == myToken) {
 		for (i = 0; i < req.body.diets.length; i++) {
 			var diet = new Diet();
