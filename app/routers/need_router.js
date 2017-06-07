@@ -100,7 +100,7 @@ router.route('/need').post(function(req, res) {
         if (req.body.type) {
           UserNeed.type = req.body.type;
         }
-        var needCoordinates = [parseFloat(req.body.position.lat), parseFloat(req.body.position.long)];
+        var needCoordinates = [parseFloat(req.body.lat), parseFloat(req.body.long)];
         UserNeed.request_position.coordinates = needCoordinates;
         UserPosition.findOne({
           is_last: true,
