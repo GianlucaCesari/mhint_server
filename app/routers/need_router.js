@@ -136,7 +136,7 @@ router.route('/need').post(function(req, res) {
 										var displayNameSender = user.name ? user.name : user.full_name;
                     note.alert = "Hey " + displayNameReciver + ",\n" + displayNameSender + " needs: " + UserNeed.name + "!\nWill you help him?";
                     note.payload = {
-                      'user': displayNameSender,
+                      'user': displayNameSender + " ",
 											'text': "needs: " + UserNeed.name + "!\nWill you help him?"
                     };
                     note.topic = "com.gianlucacesari.Mhint";
@@ -189,7 +189,7 @@ router.route('/needresponse').post(function(req, res) {
             note.alert = displayNameReciver + " refuse your request!";
           }
           note.payload = {
-            'user': displayNameReciver,
+            'user': displayNameReciver + " ",
             'text': 'Someone accepted your request'
           };
           note.topic = "com.gianlucacesari.Mhint";
