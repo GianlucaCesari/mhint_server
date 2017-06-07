@@ -6,9 +6,9 @@ var User = require('./user');
 var NeedRequestSchema = new Schema({
 	user_receiver: {type: Schema.Types.ObjectId, ref: 'User'},
 	user_sender: {type: Schema.Types.ObjectId, ref: 'User'},
-	accept: {
-		type: Boolean,
-		default: false
+	status: {
+		type: String,
+		default: "pending"
 	},
 	created_at: {
 		type: Date,

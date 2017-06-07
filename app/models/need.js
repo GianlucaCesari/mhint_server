@@ -1,11 +1,12 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var NeedRequest = require('./need_request');
+// var NeedRequest = require('./need_request');
 var User = require('./user');
 
 var NeedSchema = new Schema({
-	user: {type: Schema.Types.ObjectId, ref: 'User'},
+	user_sender: {type: Schema.Types.ObjectId, ref: 'User'},
+	user_receiver : {type: Schema.Types.ObjectId, ref: 'User'},
 	request_position: {
 		coordinates: [Number],
 		type: {
@@ -18,7 +19,11 @@ var NeedSchema = new Schema({
 	name: String,
 	description: String,
 	type: String,
-	user_requests: [{type: Schema.Types.ObjectId, ref: 'NeedRequest'}],
+	status: {
+		type: String,
+		default: "pending"
+	},
+	// user_requests: [{type: Schema.Types.ObjectId, ref: 'NeedRequest'}],
 	created_at: {
 		type: Date,
 		default: Date.now()
