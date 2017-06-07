@@ -103,6 +103,8 @@ router.route('/postdiets').post(function(req, res){
 			var diet = new Diet();
 			diet.name = req.body.diets[i].name;
 			diet.img_url = req.body.diets[i].img_url;
+			diet.description = req.body.diets[i].description;
+			diet.kcal = req.body.diets[i].kcal;
 			diet.save(function(err){
 				if (err) {
 					res.send(err);

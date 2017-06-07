@@ -4,6 +4,8 @@ var Schema = mongoose.Schema;
 var DietSchema = new Schema({
 	name: String,
 	img_url: String,
+	description: String,
+	kcal: String,
 	created_at: {
 		type: Date,
 		default: Date.now()
