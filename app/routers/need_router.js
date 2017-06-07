@@ -101,6 +101,8 @@ router.route('/need').post(function(req, res) {
           UserNeed.type = req.body.type;
         }
         var needCoordinates = [parseFloat(req.body.lat), parseFloat(req.body.long)];
+				UserNeed.display_position.lat = parseFloat(req.body.lat);
+				UserNeed.display_position.long = parseFloat(req.body.long);
         UserNeed.request_position.coordinates = needCoordinates;
         UserPosition.findOne({
           is_last: true,

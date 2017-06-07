@@ -7,6 +7,10 @@ var User = require('./user');
 var NeedSchema = new Schema({
 	user_sender: {type: Schema.Types.ObjectId, ref: 'User'},
 	user_receiver : {type: Schema.Types.ObjectId, ref: 'User'},
+	display_position: {
+		lat: Number,
+		long: Number
+	},
 	request_position: {
 		coordinates: [Number],
 		type: {
