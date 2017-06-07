@@ -6,9 +6,8 @@ var Allergenic = require('./allergenic');
 var Diet = require('./diet');
 
 var UserSchema = new Schema({
-    first_name: String,
+    name: String,
 		last_name: String,
-		full_name: String,
     birthday: String,
 		telegram_chat_id: String,
     image_profile: String,

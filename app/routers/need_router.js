@@ -132,11 +132,9 @@ router.route('/need').post(function(req, res) {
                     note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
                     note.badge = 1;
                     note.sound = "ping.aiff";
-										var displayNameReciver = nearUser.name ? nearUser.name : nearUser.full_name;
-										var displayNameSender = user.name ? user.name : user.full_name;
-                    note.alert = "Hey " + displayNameReciver + ",\n" + displayNameSender + " needs: " + UserNeed.name + "!\nWill you help him?";
+                    note.alert = "Hey " + nearUser.name + ",\n" + user.name + " needs: " + UserNeed.name + "!\nWill you help him?";
                     note.payload = {
-                      'user': displayNameSender + " ",
+                      'user': user.name,
 											'text': "needs: " + UserNeed.name + "!\nWill you help him?"
                     };
                     note.topic = "com.gianlucacesari.Mhint";
@@ -182,14 +180,13 @@ router.route('/needresponse').post(function(req, res) {
           note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
           note.badge = 1;
           note.sound = "ping.aiff";
-					var displayNameReciver = needrequest.user_receiver.name ? needrequest.user_receiver.name : needrequest.user_receiver.full_name;
           if (req.body.status == 'accepted') {
-            note.alert = displayNameReciver + " accepted your request!";
+            note.alert = needrequest.user_receiver.name + " accepted your request!";
           } else {
-            note.alert = displayNameReciver + " refuse your request!";
+            note.alert = needrequest.user_receiver.name + " refuse your request!";
           }
           note.payload = {
-            'user': displayNameReciver + " ",
+            'user': needrequest.user_receiver.name + " ",
             'text': 'Someone accepted your request'
           };
           note.topic = "com.gianlucacesari.Mhint";
@@ -221,7 +218,7 @@ router.route('/requests').get(function(req, res) {
         Need.find({
           user_receiver: user._id,
           status: {
-            $nin: "completed"
+            $nin: ["completed", "accepted"]
           }
         }).populate('user_sender').exec(function(err, reqs) {
           if (err) {

@@ -39,14 +39,9 @@ router.route('/user/:user_id').get(function(req, res) {
 router.route('/user').post(function(req, res) {
     var user = new User();
 		console.log("body is: "+req.body);
-    if (req.body.name) {
-        user.first_name = req.body.name;
-    }
+    user.name = req.body.name;
 		if (req.body.last_name) {
 			user.last_name = req.body.last_name;
-		}
-		if (req.body.full_name) {
-			user.full_name = req.body.full_name;
 		}
     if (req.body.birthday) {
         // user.birthday = new Date(req.body.birthday);
@@ -128,14 +123,9 @@ router.route('/user').put(function(req, res) {
         User.findOne({
             mail: req.body.mail
         }, function(err, user) {
-						if (req.body.name) {
-								user.first_name = req.body.name;
-						}
+						user.first_name = req.body.name;
 						if (req.body.last_name) {
 							user.last_name = req.body.last_name;
-						}
-						if (req.body.full_name) {
-							user.full_name = req.body.full_name;
 						}
             if (req.body.birthday) {
                 // user.birthday = new Date(req.body.birthday);
