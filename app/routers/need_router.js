@@ -136,7 +136,8 @@ router.route('/need').post(function(req, res) {
 										var displayNameSender = user.name ? user.name : user.full_name;
                     note.alert = "Hey " + displayNameReciver + ",\n" + displayNameSender + " needs: " + UserNeed.name + "!\nWill you help him?";
                     note.payload = {
-                      'ciao': 'prova'
+                      'user': displayNameSender,
+											'text': "needs: " + UserNeed.name + "!\nWill you help him?"
                     };
                     note.topic = "com.gianlucacesari.Mhint";
                     apnProvider.send(note, deviceToken).then((result) => {
