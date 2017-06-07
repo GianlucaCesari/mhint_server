@@ -132,8 +132,8 @@ router.route('/need').post(function(req, res) {
                     note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
                     note.badge = 1;
                     note.sound = "ping.aiff";
-										var displayNameReciver = nearUser.name != '' ? nearUser.name : nearUser.full_name;
-										var displayNameSender = user.name != '' ? user.name : user.full_name;
+										var displayNameReciver = nearUser.name ? nearUser.name : nearUser.full_name;
+										var displayNameSender = user.name ? user.name : user.full_name;
                     note.alert = "Hey " + displayNameReciver + ",\n" + displayNameSender + " needs: " + UserNeed.name + "!\nWill you help him?";
                     note.payload = {
                       'ciao': 'prova'
@@ -181,7 +181,7 @@ router.route('/needresponse').post(function(req, res) {
           note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
           note.badge = 1;
           note.sound = "ping.aiff";
-					var displayNameReciver = needrequest.user_receiver.name != "" ? needrequest.user_receiver.name : needrequest.user_receiver.full_name;
+					var displayNameReciver = needrequest.user_receiver.name ? needrequest.user_receiver.name : needrequest.user_receiver.full_name;
           if (req.body.status == 'accepted') {
             note.alert = displayNameReciver + " accepted your request!";
           } else {
