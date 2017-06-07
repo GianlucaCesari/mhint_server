@@ -11,13 +11,6 @@ var User = require('../models/user');
 //  router init
 var router = express.Router();
 
-router.use(function(req, res, next){
-	res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-	console.log('user_router...');
-	next();
-});
-
 //  REST User
 //  GET ALL USERS
 router.route('/user').get(function(req, res) {

@@ -17,11 +17,23 @@ var User = require('./app/models/user');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+// Mongoodr promise lib
+mongoose.Promise = global.Promise;
+
 //  db connection
 mongoose.connect('mongodb://localhost:27017/Mhint');
 
 //  set port
 var port = process.env.PORT || 3000;
+
+// log
+app.use(function(req, res, next){
+	res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+	var date = new Date();
+	console.log("["+date+"]["+req.method+"]["+req.url+"]");
+	next();
+});
 
 //  User Router
 var user_router = require('./app/routers/user_router');

@@ -54,13 +54,6 @@ function deg2rad(deg) {
   return deg * (Math.PI/180)
 }
 
-router.use(function(req, res, next){
-	res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-	console.log('need_router..');
-	next();
-});
-
 router.route('/test').post(function(req, res){
 	var point = req.body.point;
 	UserPosition.findOne({ is_last: true, position: { $geoNear: {type: "Point", coordinates: point}}}).exec(function(err,pos){
