@@ -51,6 +51,10 @@ app.use(need_router);
 var shopping_router = require('./app/routers/shopping_router');
 app.use(shopping_router);
 
+// allergenic Diet Router
+var allergenic_diet_router = require('./app/routers/allergenic_diet_router');
+app.use(allergenic_diet_router);
+
 //  start server
 app.listen(port);
 console.log('Server started on port ' + port);
