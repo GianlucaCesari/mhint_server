@@ -132,7 +132,9 @@ router.route('/need').post(function(req, res) {
                     note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
                     note.badge = 1;
                     note.sound = "ping.aiff";
-                    note.alert = "Hey " + nearUser.full_name + ",\n" + user.full_name + " needs: " + UserNeed.name + "!\nWill you help him?";
+										var displayNameReciver = nearUser.name != '' ? nearUser.name : nearUser.full_name;
+										var displayNameSender = user.name != '' ? user.name : user.full_name;
+                    note.alert = "Hey " + displayNameReciver + ",\n" + displayNameSender + " needs: " + UserNeed.name + "!\nWill you help him?";
                     note.payload = {
                       'ciao': 'prova'
                     };
@@ -164,7 +166,7 @@ router.route('/need').post(function(req, res) {
 });
 
 router.route('/needresponse').post(function(req, res) {
-  Need.findById(req.body.request_id).populate('user_receiver').exec(function(err, needrequest) {
+  Need.findById(req.body.request_id).populate('user_receiver').populate('user_sender').exec(function(err, needrequest) {
     if (err) {
       res.send(err);
     } else {
@@ -174,18 +176,19 @@ router.route('/needresponse').post(function(req, res) {
           res.send(err);
         } else {
           var note = new apn.Notification();
-          var deviceToken = user.device_token;
+          var deviceToken = needrequest.user_sender.device_token;
 
           note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
           note.badge = 1;
           note.sound = "ping.aiff";
+					var displayNameReciver = needrequest.user_receiver.name != "" ? needrequest.user_receiver.name : needrequest.user_receiver.full_name;
           if (req.body.status == 'accepted') {
-            note.alert = needrequest.user_receiver.full_name + " someone accepted your request!";
+            note.alert = displayNameReciver + " accepted your request!";
           } else {
-            note.alert = needrequest.user_receiver.full_name + " your request was not accepted!";
+            note.alert = displayNameReciver + " refuse your request!";
           }
           note.payload = {
-            'user': needrequest.user_receiver.full_name,
+            'user': displayNameReciver,
             'text': 'Someone accepted your request'
           };
           note.topic = "com.gianlucacesari.Mhint";
