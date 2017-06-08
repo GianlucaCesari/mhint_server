@@ -81,10 +81,8 @@ router.route('/foodpreference').get(function(req, res) {
       }
     }).limit(10).exec(function(err, foods) {
       if (err) {
-        console.log("ciao");
         res.send(err);
       } else {
-        console.log("ok");
         res.json(foods);
       }
     })
@@ -100,7 +98,6 @@ router.route('/foodpreference').post(function(req, res) {
     Food.findById(req.body.food_id).exec(function(err, food) {
       if (err) {
         res.send(err);
-        console.log("no id");
       } else {
         var user_preference = new UserPreference();
         user_preference.user_mail = req.body.mail;
@@ -109,16 +106,13 @@ router.route('/foodpreference').post(function(req, res) {
         user_preference.save(function(err) {
           if (err) {
             res.send(err);
-            console.log("no pref");
           } else {
             food.user_preference = food.user_preference || [];
             food.user_preference.push(req.body.mail);
             food.save(function(err) {
               if (err) {
                 res.send(err);
-                console.log("no save");
               } else {
-                console.log("ok save");
                 res.json({
                   message: "Created",
                   value: user_preference

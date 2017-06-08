@@ -20,7 +20,6 @@ router.route('/user').get(function(req, res) {
         users.forEach(function(user) {
             userMap[user._id] = user;
         });
-        console.log(userMap);
         res.send(userMap);
     });
 });
@@ -39,7 +38,6 @@ router.route('/user/:user_id').get(function(req, res) {
 // POST USER
 router.route('/user').post(function(req, res) {
     var user = new User();
-		console.log("body is: "+req.body);
     user.name = req.body.name;
 		if (req.body.last_name) {
 			user.last_name = req.body.last_name;
@@ -109,7 +107,6 @@ router.route('/user').post(function(req, res) {
                 res.send(err);
             }
         } else {
-            console.log(user);
             res.json({
                 message: "Created",
                 value: user
@@ -175,7 +172,7 @@ router.route('/user').put(function(req, res) {
             }
             user.save(function(err) {
                 if (err) {
-                    console.error('ERROR!');
+									res.send(err);
                 } else {
 									res.json(user);
                 }
