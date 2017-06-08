@@ -77,9 +77,7 @@ router.route('/need').post(function(req, res) {
         var UserNeed = new Need();
         UserNeed.user_sender = user;
         UserNeed.name = req.body.name;
-        if (req.body.description) {
-          UserNeed.description = req.body.description;
-        }
+        UserNeed.description = req.body.description;
         if (req.body.type) {
           UserNeed.type = req.body.type;
         }
