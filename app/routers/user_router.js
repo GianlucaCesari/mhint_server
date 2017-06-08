@@ -123,7 +123,9 @@ router.route('/user').put(function(req, res) {
         User.findOne({
             mail: req.body.mail
         }, function(err, user) {
-						user.name = req.body.name;
+						if (req.body.name) {
+							user.name = req.body.name;
+						}
 						if (req.body.last_name) {
 							user.last_name = req.body.last_name;
 						}
@@ -174,12 +176,7 @@ router.route('/user').put(function(req, res) {
                 if (err) {
                     console.error('ERROR!');
                 } else {
-                    User.find({
-                        mail: req.body.mail
-                    }, function(err, user) {
-                        console.log(user);
-                        res.json(user);
-                    });
+									res.json(user);
                 }
             });
         });
