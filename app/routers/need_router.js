@@ -208,7 +208,7 @@ router.route('/requests').get(function(req, res) {
           status: {
             $nin: ["completed", "refused"]
           }
-        }).populate('user_sender').exec(function(err, reqs) {
+        }).populate('user_sender').sort({created_at:-1}).exec(function(err, reqs) {
           if (err) {
             res.send(err);
           } else {
@@ -237,7 +237,7 @@ router.route('/needs').get(function(req, res) {
           status: {
             $nin: "completed"
           }
-        }).populate('user_receiver').exec(function(err, needs) {
+        }).populate('user_receiver').sort({created_at:-1}).exec(function(err, needs) {
           if (err) {
             res.send(err);
           } else {
