@@ -1,7 +1,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-// var NeedRequest = require('./need_request');
 var User = require('./user');
 
 var NeedSchema = new Schema({
@@ -27,7 +26,6 @@ var NeedSchema = new Schema({
 		type: String,
 		default: "pending"
 	},
-	// user_requests: [{type: Schema.Types.ObjectId, ref: 'NeedRequest'}],
 	created_at: {
 		type: Date,
 		default: Date.now()

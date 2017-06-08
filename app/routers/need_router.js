@@ -66,23 +66,6 @@ function deg2rad(deg) {
   return deg * (Math.PI / 180)
 }
 
-// router.route('/test').post(function(req, res){
-// 	var point = req.body.point;
-// 	UserPosition.findOne({ is_last: true, position: { $geoNear: {type: "Point", coordinates: point}}}).exec(function(err,pos){
-// 		if (err) {
-// 			res.send(err);
-// 		} else {
-// 			User.findById(pos.user_id).exec(function(err, user){
-// 				if (err) {
-// 					res.send(err);
-// 				} else {
-// 					res.json(user);
-// 				}
-// 			});
-// 		}
-// 	});
-// });
-
 router.route('/need').post(function(req, res) {
   if (req.body.mail) {
     User.findOne({
@@ -283,15 +266,5 @@ router.route('/needcomplete').post(function(req, res){
 		}
 	});
 });
-
-// router.route('/needs').get(function(req, res){
-// 	Need.find().populate('user').populate('target_users').populate('request_position').exec(function(err, needs){
-// 		if (err) {
-// 			res.send(err);
-// 		} else {
-// 			res.json(needs);
-// 		}
-// 	});
-// });
 
 module.exports = router;

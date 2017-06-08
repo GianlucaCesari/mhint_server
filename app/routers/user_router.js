@@ -287,6 +287,8 @@ router.route('/userpositions').post(function(req, res){
 			} else {
 				var UserPos = new UserPosition();
 				UserPos.position.coordinates = [parseFloat(req.body.lat), parseFloat(req.body.long)];
+				UserPos.display_position.lat = parseFloat(req.body.lat);
+				UserPos.display_position.long = parseFloat(req.body.long);
 				UserPos.user_id = user.id;
 				UserPosition.findOne({user_id: user.id, is_last: true}).exec(function(err, pos){
 					if (err) {
@@ -302,7 +304,6 @@ router.route('/userpositions').post(function(req, res){
 										if (err) {
 											res.send(err);
 										} else {
-											// user.positions = user.positions || [];
 											user.last_position = UserPos;
 											user.save(function(err){
 												if (err) {
@@ -320,7 +321,6 @@ router.route('/userpositions').post(function(req, res){
 								if (err) {
 									res.send(err);
 								} else {
-									// user.positions = user.positions || [];
 									user.last_position = UserPos;
 									user.save(function(err){
 										if (err) {

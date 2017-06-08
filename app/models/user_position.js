@@ -13,6 +13,10 @@ var UserPositionSchema = new Schema({
             default: "Point"
     },
 	},
+	display_position: {
+		lat: Number,
+		long: Number
+	},
 	user_id: {type: Schema.Types.ObjectId, ref: 'User'},
 	is_last: {type: Boolean, default: true},
 	created_at: {
