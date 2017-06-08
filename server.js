@@ -8,6 +8,7 @@ var express = require('express');
 
 //  app init
 var app = express();
+process.setMaxListeners(0);
 
 //  require mongoose models
 var Contact = require('./app/models/contact');
