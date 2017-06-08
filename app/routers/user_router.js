@@ -123,7 +123,7 @@ router.route('/user').put(function(req, res) {
         User.findOne({
             mail: req.body.mail
         }, function(err, user) {
-						user.first_name = req.body.name;
+						user.name = req.body.name;
 						if (req.body.last_name) {
 							user.last_name = req.body.last_name;
 						}
