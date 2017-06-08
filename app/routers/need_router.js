@@ -269,10 +269,10 @@ router.route('/needcomplete').post(function(req, res){
 					note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
 					note.badge = 1;
 					note.sound = "ping.aiff";
-					note.alert = "Hey " + need.user_receiver.name + ",\n" + need.user_sender.name + "doesn't need your help for " + need.name + " anymore!";
+					note.alert = "Hey " + need.user_receiver.name + ",\n" + need.user_sender.name + " doesn't need your help for " + need.name + " anymore!";
 					note.payload = {
 						'user': need.name,
-						'text': need.user_sender.name + "doesn't need your help anymore!"
+						'text': need.user_sender.name + " doesn't need your help anymore!"
 					};
 					note.topic = "com.gianlucacesari.Mhint";
 					apnProvider.send(note, deviceToken).then((result) => {
