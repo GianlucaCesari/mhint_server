@@ -258,29 +258,32 @@ router.route('/needcomplete').post(function(req, res){
 		if (err) {
 			res.send(err);
 		} else {
+			var notify = need.status == 'refused' ? false : true;
 			need.status = "completed";
 			need.save(function(err){
 				if (err) {
 					res.send(err);
 				} else {
-					var note = new apn.Notification();
-					var deviceToken = need.user_receiver.device_token;
+					if (notify) {
+						var note = new apn.Notification();
+						var deviceToken = need.user_receiver.device_token;
 
-					note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
-					note.badge = 1;
-					note.sound = "ping.aiff";
-					note.alert = "Hey " + need.user_receiver.name + ",\n" + need.user_sender.name + " doesn't need your help for " + need.name + " anymore!";
-					note.payload = {
-						'user': need.name,
-						'text': need.user_sender.name + " doesn't need your help anymore!"
-					};
-					note.topic = "com.gianlucacesari.Mhint";
-					apnProvider.send(note, deviceToken).then((result) => {
-						console.log("notification: " + JSON.stringify(result));
-					});
-					apnProvider2.send(note, deviceToken).then((result) => {
-						console.log("notification: " + JSON.stringify(result));
-					});
+						note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
+						note.badge = 1;
+						note.sound = "ping.aiff";
+						note.alert = "Hey " + need.user_receiver.name + ",\n" + need.user_sender.name + " doesn't need your help for " + need.name + " anymore!";
+						note.payload = {
+							'user': need.name,
+							'text': need.user_sender.name + " doesn't need your help anymore!"
+						};
+						note.topic = "com.gianlucacesari.Mhint";
+						apnProvider.send(note, deviceToken).then((result) => {
+							console.log("notification: " + JSON.stringify(result));
+						});
+						apnProvider2.send(note, deviceToken).then((result) => {
+							console.log("notification: " + JSON.stringify(result));
+						});
+					}
 					res.json({status: 200, message: "OK"});
 				}
 			});
