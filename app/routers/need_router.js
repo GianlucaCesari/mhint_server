@@ -264,7 +264,7 @@ router.route('/needcomplete').post(function(req, res){
 					res.send(err);
 				} else {
 					var note = new apn.Notification();
-					var deviceToken = nearUser.device_token;
+					var deviceToken = need.user_receiver.device_token;
 
 					note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
 					note.badge = 1;
