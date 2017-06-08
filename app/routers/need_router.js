@@ -254,7 +254,7 @@ router.route('/needs').get(function(req, res) {
 });
 
 router.route('/needcomplete').post(function(req, res){
-	Need.findById(req.body.request_id).exec(function(err, need){
+	Need.findById(req.body.request_id).populate('user_receiver').populate('user_sender').exec(function(err, need){
 		if (err) {
 			res.send(err);
 		} else {
