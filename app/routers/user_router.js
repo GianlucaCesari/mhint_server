@@ -4,6 +4,7 @@
 var express = require('express');
 
 //  require mongoose models
+var AuthApplication = require('../models/auth_application');
 var UserPosition = require('../models/user_position');
 var Contact = require('../models/contact');
 var User = require('../models/user');
@@ -337,6 +338,31 @@ router.route('/userpositions').post(function(req, res){
 			res.json({
 					message: "Cannot find user without identifier"
 			});
+	}
+});
+
+router.route('/apikey').post(function(req,res){
+	if (req.body.mail) {
+		User.findOne({mail: req.body.mail}).exec(function(err, user){
+			if (err) {
+				res.send(err);
+			} else {
+				var app = new AuthApplication();
+				app.app_name = req.body.app_name;
+				app.owner = user;
+				app.save(function(err){
+					if (err) {
+						res.send(err);
+					} else {
+						res.json({token: app.api_key});
+					}
+				});
+			}
+		});
+	} else {
+		res.json({
+				message: "Cannot find user without identifier"
+		});
 	}
 });
 
