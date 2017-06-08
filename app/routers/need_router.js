@@ -201,7 +201,7 @@ router.route('/requests').get(function(req, res) {
         Need.find({
           user_receiver: user._id,
           status: {
-            $nin: ["completed", "accepted"]
+            $nin: ["completed", "refused"]
           }
         }).populate('user_sender').exec(function(err, reqs) {
           if (err) {
