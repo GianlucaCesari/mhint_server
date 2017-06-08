@@ -164,14 +164,19 @@ router.route('/needresponse').post(function(req, res) {
           note.badge = 1;
           note.sound = "ping.aiff";
           if (req.body.status == 'accepted') {
-            note.alert = needrequest.user_receiver.name + " accepted your request!";
+            note.alert = needrequest.user_receiver.name + " accepted your request for "+needrequest.name+"!";
+						note.payload = {
+	            'user': needrequest.name,
+	            'text': needrequest.user_receiver.name + ' accepted your request!'
+	          };
           } else {
-            note.alert = needrequest.user_receiver.name + " refuse your request!";
+            note.alert = needrequest.user_receiver.name + " refuse your request for "+needrequest.name+"!";
+						note.payload = {
+	            'user': needrequest.name,
+	            'text': needrequest.user_receiver.name + ' refuse your request!'
+	          };
           }
-          note.payload = {
-            'user': needrequest.user_receiver.name + " ",
-            'text': 'Someone accepted your request'
-          };
+
           note.topic = "com.gianlucacesari.Mhint";
           apnProvider.send(note, deviceToken).then((result) => {
             console.log("notification: " + JSON.stringify(result));
