@@ -138,7 +138,7 @@ router.route('/need').post(function(req, res) {
 											} else {
 												status = "FAILED";
 											}
-											console.log("["+date+"][PUSH NOTIFICATION]["+status+"]["+nearUser.mail+"]");
+											console.log("["+date+"][PUSH NOTIFICATION][prod]["+status+"]["+nearUser.mail+"]");
                       // console.log("notification: " + JSON.stringify(result));
                     });
                     res.json({
@@ -192,6 +192,7 @@ router.route('/needresponse').post(function(req, res) {
           }
 
           note.topic = "com.gianlucacesari.Mhint";
+					var date = new Date();
           apnProvider.send(note, deviceToken).then((result) => {
 						var status = "";
 						if (result.sent.length > 0) {
@@ -209,7 +210,7 @@ router.route('/needresponse').post(function(req, res) {
 						} else {
 							status = "FAILED";
 						}
-						console.log("["+date+"][PUSH NOTIFICATION]["+status+"]["+needrequest.user_sender.mail+"]");
+						console.log("["+date+"][PUSH NOTIFICATION][prod]["+status+"]["+needrequest.user_sender.mail+"]");
             // console.log("notification: " + JSON.stringify(result));
           });
           res.json({
@@ -305,6 +306,7 @@ router.route('/needcomplete').post(function(req, res){
 							'text': need.user_sender.name + " doesn't need your help anymore!"
 						};
 						note.topic = "com.gianlucacesari.Mhint";
+						var date = new Date();
 						apnProvider.send(note, deviceToken).then((result) => {
 							var status = "";
 							if (result.sent.length > 0) {
@@ -322,7 +324,7 @@ router.route('/needcomplete').post(function(req, res){
 							} else {
 								status = "FAILED";
 							}
-							console.log("["+date+"][PUSH NOTIFICATION]["+status+"]["+need.user_receiver.mail+"]");
+							console.log("["+date+"][PUSH NOTIFICATION][prod]["+status+"]["+need.user_receiver.mail+"]");
 							// console.log("notification: " + JSON.stringify(result));
 						});
 					}
