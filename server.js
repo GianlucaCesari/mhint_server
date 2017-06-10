@@ -8,12 +8,10 @@ var express = require('express');
 
 //  app init
 var app = express();
-process.setMaxListeners(0);
+app.setMaxListeners(0);
 
 //  require mongoose models
 var AuthApplication = require('./app/models/auth_application');
-var Contact = require('./app/models/contact');
-var User = require('./app/models/user');
 
 //  use bodyParser
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -28,7 +26,7 @@ mongoose.connect('mongodb://localhost:27017/Mhint');
 //  set port
 var port = process.env.PORT || 3000;
 
-// log and authorization
+// logs and authorization
 app.use(function(req, res, next){
 	res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -59,12 +57,16 @@ app.use(function(req, res, next){
 	// 		}
 	// 	});
 	// }
-	
+
 	if(req.headers.authorization) {
 		console.log(req.headers.authorization);
 	}
 	var date = new Date();
-	console.log("["+date+"]["+req.method+"]["+req.url+"]");
+	var mail = "";
+	if (req.body.mail) {
+		mail = "["+req.body.mail+"]";
+	}
+	console.log("["+date+"]["+req.method+"]["+req.url+"]"+mail);
 	next();
 });
 

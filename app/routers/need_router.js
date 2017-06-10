@@ -6,7 +6,6 @@ var apn = require('apn');
 
 //  require mongoose models
 var UserPosition = require('../models/user_position');
-var NeedRequest = require('../models/need_request');
 var Need = require('../models/need');
 var User = require('../models/user');
 
@@ -121,11 +120,26 @@ router.route('/need').post(function(req, res) {
 											'text': user.name +" needs: " + UserNeed.name + "!\nWill you help him?"
                     };
                     note.topic = "com.gianlucacesari.Mhint";
+										var date = new Date();
                     apnProvider.send(note, deviceToken).then((result) => {
-                      console.log("notification: " + JSON.stringify(result));
+											var status = "";
+											if (result.sent.length > 0) {
+												status = "SENT";
+											} else {
+												status = "FAILED";
+											}
+											console.log("["+date+"][PUSH NOTIFICATION][dev]["+status+"]["+nearUser.mail+"]");
+                      // console.log("notification: " + JSON.stringify(result));
                     });
                     apnProvider2.send(note, deviceToken).then((result) => {
-                      console.log("notification: " + JSON.stringify(result));
+											var status = "";
+											if (result.sent.length > 0) {
+												status = "SENT";
+											} else {
+												status = "FAILED";
+											}
+											console.log("["+date+"][PUSH NOTIFICATION]["+status+"]["+nearUser.mail+"]");
+                      // console.log("notification: " + JSON.stringify(result));
                     });
                     res.json({
                       status: 200,
@@ -179,10 +193,24 @@ router.route('/needresponse').post(function(req, res) {
 
           note.topic = "com.gianlucacesari.Mhint";
           apnProvider.send(note, deviceToken).then((result) => {
-            console.log("notification: " + JSON.stringify(result));
+						var status = "";
+						if (result.sent.length > 0) {
+							status = "SENT";
+						} else {
+							status = "FAILED";
+						}
+						console.log("["+date+"][PUSH NOTIFICATION][dev]["+status+"]["+needrequest.user_sender.mail+"]");
+            // console.log("notification: " + JSON.stringify(result));
           });
           apnProvider2.send(note, deviceToken).then((result) => {
-            console.log("notification: " + JSON.stringify(result));
+						var status = "";
+						if (result.sent.length > 0) {
+							status = "SENT";
+						} else {
+							status = "FAILED";
+						}
+						console.log("["+date+"][PUSH NOTIFICATION]["+status+"]["+needrequest.user_sender.mail+"]");
+            // console.log("notification: " + JSON.stringify(result));
           });
           res.json({
             status: 200,
@@ -278,10 +306,24 @@ router.route('/needcomplete').post(function(req, res){
 						};
 						note.topic = "com.gianlucacesari.Mhint";
 						apnProvider.send(note, deviceToken).then((result) => {
-							console.log("notification: " + JSON.stringify(result));
+							var status = "";
+							if (result.sent.length > 0) {
+								status = "SENT";
+							} else {
+								status = "FAILED";
+							}
+							console.log("["+date+"][PUSH NOTIFICATION][dev]["+status+"]["+need.user_receiver.mail+"]");
+							// console.log("notification: " + JSON.stringify(result));
 						});
 						apnProvider2.send(note, deviceToken).then((result) => {
-							console.log("notification: " + JSON.stringify(result));
+							var status = "";
+							if (result.sent.length > 0) {
+								status = "SENT";
+							} else {
+								status = "FAILED";
+							}
+							console.log("["+date+"][PUSH NOTIFICATION]["+status+"]["+need.user_receiver.mail+"]");
+							// console.log("notification: " + JSON.stringify(result));
 						});
 					}
 					res.json({status: 200, message: "OK"});

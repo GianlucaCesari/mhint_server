@@ -5,14 +5,17 @@ var ContactSchema = new Schema({
     name: String,
     prefix : String,
     tel_number: Number,
-    created_at: {
-        type: Date,
-        default: Date.now()
-    },
-    updated_at: {
-        type: Date,
-        default: Date.now()
-    }
+    created_at: Date,
+    updated_at: Date
+});
+
+ContactSchema.pre('save', function(next){
+  now = new Date();
+  this.updated_at = now;
+  if ( !this.created_at ) {
+    this.created_at = now;
+  }
+  next();
 });
 
 module.exports = mongoose.model('Contact', ContactSchema);

@@ -19,10 +19,15 @@ var UserPositionSchema = new Schema({
 	},
 	user_id: {type: Schema.Types.ObjectId, ref: 'User'},
 	is_last: {type: Boolean, default: true},
-	created_at: {
-		type: Date,
-		default: Date.now()
-	}
+	created_at: Date
+});
+
+UserPositionSchema.pre('save', function(next){
+  now = new Date();
+  if ( !this.created_at ) {
+    this.created_at = now;
+  }
+  next();
 });
 
 UserPositionSchema.index({ position: "2dsphere" });

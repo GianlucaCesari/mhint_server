@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-//var Contact = require('./contact');
+
 var UserPosition = require('./user_position');
 var Allergenic = require('./allergenic');
 var Diet = require('./diet');
@@ -59,14 +59,17 @@ var UserSchema = new Schema({
 		diet: {type: Schema.Types.ObjectId, ref: 'Diet'},
     contacts: [],
 		last_position: {type: Schema.Types.ObjectId, ref: 'UserPosition'},
-		created_at: {
-			type: Date,
-			default: Date.now()
-		},
-		updated_at: {
-			type: Date,
-			default: Date.now()
-		}
+		created_at: Date,
+		updated_at: Date
+});
+
+UserSchema.pre('save', function(next){
+  now = new Date();
+  this.updated_at = now;
+  if ( !this.created_at ) {
+    this.created_at = now;
+  }
+  next();
 });
 
 module.exports = mongoose.model('User', UserSchema);

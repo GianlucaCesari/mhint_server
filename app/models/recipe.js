@@ -19,14 +19,17 @@ var RecipeSchema = new Schema({
 	}],
 	img_url: String,
 	nutrients: [],
-	created_at: {
-		type: Date,
-		default: Date.now()
-	},
-	updated_at: {
-		type: Date,
-		default: Date.now()
-	}
+	created_at: Date,
+	updated_at: Date
+});
+
+RecipeSchema.pre('save', function(next){
+  now = new Date();
+  this.updated_at = now;
+  if ( !this.created_at ) {
+    this.created_at = now;
+  }
+  next();
 });
 
 RecipeSchema.plugin(random, { path: 'r' });

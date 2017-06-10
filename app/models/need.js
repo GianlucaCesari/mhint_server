@@ -26,14 +26,17 @@ var NeedSchema = new Schema({
 		type: String,
 		default: "pending"
 	},
-	created_at: {
-		type: Date,
-		default: Date.now()
-	},
-	updated_at: {
-		type: Date,
-		default: Date.now()
-	}
+	created_at: Date,
+	updated_at: Date
+});
+
+NeedSchema.pre('save', function(next){
+  now = new Date();
+  this.updated_at = now;
+  if ( !this.created_at ) {
+    this.created_at = now;
+  }
+  next();
 });
 
 NeedSchema.index({ request_position: "2dsphere" });
