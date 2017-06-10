@@ -14,7 +14,9 @@ app.setMaxListeners(0);
 var AuthApplication = require('./app/models/auth_application');
 
 //  use bodyParser
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 app.use(bodyParser.json());
 
 // Mongoodr promise lib
@@ -27,47 +29,51 @@ mongoose.connect('mongodb://localhost:27017/Mhint');
 var port = process.env.PORT || 3000;
 
 // logs and authorization
-app.use(function(req, res, next){
-	res.header("Access-Control-Allow-Origin", "*");
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-	// if (req.url == "/apikey") {
-	// 	var date = new Date();
-	// 	console.log("["+date+"][DEVREQUEST]["+req.method+"]["+req.url+"]");
-	// 	next();
-	// } else {
-	// 	AuthApplication.findOne({api_key: req.headers.authorization}).exec(function(err, app){
-	// 		if (err) {
-	// 			res.send(err);
-	// 		} else {
-	// 			if (app) {
-	// 				if (app.status == "pending") {
-	// 					res.json({status: 401 ,message: "unauthorized, your api_key request in pending"});
-	// 				} else if (app.status == "revoked") {
-	// 					res.json({status: 401 ,message: "unauthorized, your api_key was revoked"});
-	// 				} else if (app.status == "active") {
-	// 					var date = new Date();
-	// 					console.log("["+date+"]["+app.app_name+"]["+req.method+"]["+req.url+"]");
-	// 					next();
-	// 				} else {
-	// 					res.json({status: 401 ,message: "unauthorized"});
-	// 				}
-	// 			} else {
-	// 				res.json({status: 401 ,message: "unauthorized"});
-	// 			}
-	// 		}
-	// 	});
-	// }
+  // if (req.url == "/apikey") {
+  // 	var date = new Date();
+  // 	console.log("["+date+"][DEVREQUEST]["+req.method+"]["+req.url+"]");
+  // 	next();
+  // } else {
+  // 	AuthApplication.findOne({api_key: req.headers.authorization}).exec(function(err, app){
+  // 		if (err) {
+  // 			res.send(err);
+  // 		} else {
+  // 			if (app) {
+  // 				if (app.status == "pending") {
+  // 					res.json({status: 401 ,message: "unauthorized, your api_key request in pending"});
+  // 				} else if (app.status == "revoked") {
+  // 					res.json({status: 401 ,message: "unauthorized, your api_key was revoked"});
+  // 				} else if (app.status == "active") {
+  // 					var date = new Date();
+  // 					console.log("["+date+"]["+app.app_name+"]["+req.method+"]["+req.url+"]");
+  // 					next();
+  // 				} else {
+  // 					res.json({status: 401 ,message: "unauthorized"});
+  // 				}
+  // 			} else {
+  // 				res.json({status: 401 ,message: "unauthorized"});
+  // 			}
+  // 		}
+  // 	});
+  // }
 
-	if(req.headers.authorization) {
-		console.log(req.headers.authorization);
-	}
-	var date = new Date();
-	var mail = "";
-	if (req.body.mail) {
-		mail = "["+req.body.mail+"]";
-	}
-	console.log("["+date+"]["+req.method+"]["+req.url+"]"+mail);
-	next();
+  if (req.headers.authorization) {
+    console.log(req.headers.authorization);
+  }
+  var date = new Date();
+  var append = "";
+  if (req.body.mail) {
+    append = "[" + req.body.mail + "]";
+  } else if (req.query.mail) {
+    append = "[" + req.query.mail + "]";
+  } else if (req.query.id) {
+    append = "[" + req.query.id + "]";
+  }
+  console.log("[" + date + "][" + req.method + "][" + req._parsedUrl.pathname + "]" + append);
+  next();
 });
 
 //  User Router

@@ -69,8 +69,8 @@ router.route('/foods').get(function(req, res) {
   });
 });
 
-router.route('/foods/:food_id').get(function(req, res) {
-  Food.findById(req.params.food_id, function(err, food) {
+router.route('/foods').get(function(req, res) {
+  Food.findById(req.query.id, function(err, food) {
     if (err) {
       res.send(err);
     } else {
