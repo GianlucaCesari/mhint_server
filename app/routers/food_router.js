@@ -370,7 +370,13 @@ router.route('/weeklyplan').get(function(req, res) {
 
 router.route('/recipe').get(function(req, res) {
   if (req.query.id) {
-
+		Recipe.findById(req.query.id).populate('ingredients.food').exec(function(err, recipe){
+			if (err) {
+				res.send(err);
+			} else {
+				res.json(recipe);
+			}
+		});
   } else {
     res.json({
       message: "Cannot get recipe without identifier"
