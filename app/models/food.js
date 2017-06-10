@@ -3,10 +3,12 @@ var random = require('mongoose-random');
 var Schema = mongoose.Schema;
 
 var Nutrient = require('./nutrient');
+var Category = require('./category');
 
 var FoodSchema = new Schema({
 	name: String,
-	category: Schema.Types.ObjectId,
+	spoon_id: Number,
+	category: {type: Schema.Types.ObjectId, ref: 'Category'},
 	img_url: String,
 	nutrients: [],
 	user_preference: [],
