@@ -6,6 +6,7 @@ var mongoose = require('mongoose');
 var unirest = require('unirest');
 var express = require('express');
 
+
 //  app init
 var app = express();
 app.setMaxListeners(0);
@@ -19,7 +20,7 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
-// Mongoodr promise lib
+// Mongoose promise lib
 mongoose.Promise = global.Promise;
 
 //  db connection
@@ -95,6 +96,10 @@ app.use(shopping_router);
 // Allergenic Diet Router
 var allergenic_diet_router = require('./app/routers/allergenic_diet_router');
 app.use(allergenic_diet_router);
+
+// Chatbot Router
+var chatbot_router = require('./app/routers/chatbot_router');
+app.use(chatbot_router);
 
 //  start server
 app.listen(port);
