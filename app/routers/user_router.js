@@ -236,7 +236,7 @@ router.route('/user/find').post(function(req, res) {
           status: 500,
           message: "Internal Server Error: DB error"
         })
-      } else if (user != null && user != undefined) {
+      } else if (user.length > 0) {
         res.json({
           status: 200,
           message: "OK",
