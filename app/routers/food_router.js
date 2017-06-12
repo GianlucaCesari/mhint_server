@@ -314,7 +314,11 @@ router.route('/weeklyplan').get(function(req, res) {
                         newrecipe.title = data.title;
                         newrecipe.img_url = data.image;
                         newrecipe.minutes = data.readyInMinutes;
-                        newrecipe.instructions = data.instructions;
+												if (data.instructions != null) {
+                        	newrecipe.instructions = data.instructions;
+												} else {
+													newrecipe.instructions = "";
+												}
                         newrecipe.ingredients = [];
                         newrecipe.caloric_breakdown = data.nutrition.caloricBreakdown;
                         newrecipe.steps = data.analyzedInstructions;
