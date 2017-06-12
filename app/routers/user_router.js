@@ -6,7 +6,6 @@ var express = require('express');
 //  require mongoose models
 var AuthApplication = require('../models/auth_application');
 var UserPosition = require('../models/user_position');
-var Contact = require('../models/contact');
 var User = require('../models/user');
 
 //  router init
@@ -17,31 +16,20 @@ var router = express.Router();
 router.route('/user').get(function(req, res) {
   User.find({}).exec(function(err, users) {
     if (err) {
-      res.send(err);
+      console.log(err);
+      res.json({
+        status: 500,
+        message: "Internal Server Error: DB error"
+      });
     } else {
-      res.json(users);
+      res.json({
+        status: 200,
+        message: "OK",
+        value: users
+      });
     }
   });
 });
-
-// GET USER By ID
-// router.route('/user/:user_id').get(function(req, res) {
-//   User.findById(req.params.user_id).populate({
-//     path: 'positions',
-//     options: {
-//       limit: 2,
-//       sort: {
-//         'created_at': -1
-//       }
-//     }
-//   }).exec(function(err, user) {
-//     if (err) {
-//       res.send(err);
-//     } else {
-//       res.json(user);
-//     }
-//   });
-// });
 
 // POST USER
 router.route('/user').post(function(req, res) {
@@ -53,7 +41,7 @@ router.route('/user').post(function(req, res) {
       console.log(err);
       res.json({
         status: 500,
-        message: "db error"
+        message: "Internal Server Error: DB error"
       });
     } else if (userFound) {
       user = userFound;
@@ -65,7 +53,6 @@ router.route('/user').post(function(req, res) {
       user.last_name = req.body.last_name;
     }
     if (req.body.birthday) {
-      // user.birthday = new Date(req.body.birthday);
       user.birthday = req.body.birthday;
     }
     if (req.body.imageProfile) {
@@ -107,27 +94,17 @@ router.route('/user').post(function(req, res) {
     if (req.body.tel_number) {
       user.tel_number = req.body.tel_number;
     }
-    // if (req.body.contacts) {
-    //   var contactsArray = [];
-    //   for (var contact in req.body.contacts) {
-    //     var contact = new Contact()
-    //     contact.name = req.body.contacts.name;
-    //     contact.prefix = req.body.contacts.prefix;
-    //     contact.tel_number = req.body.contacts.tel_number;
-    //     contactsArray.push(contact);
-    //   }
-    //   user.contacts = contactsArray;
-    // }
 
     user.save(function(err) {
       if (err) {
         console.log(err);
         res.json({
           status: 500,
-          message: "db error"
+          message: "Internal Server Error: DB error"
         })
       } else {
         res.json({
+          status: 201,
           message: "Created",
           value: user
         });
@@ -142,66 +119,80 @@ router.route('/user').put(function(req, res) {
     User.findOne({
       mail: req.body.mail
     }, function(err, user) {
-      if (req.body.name) {
-        user.name = req.body.name;
-      }
-      if (req.body.last_name) {
-        user.last_name = req.body.last_name;
-      }
-      if (req.body.birthday) {
-        // user.birthday = new Date(req.body.birthday);
-        user.birthday = req.body.birthday;
-      }
-      if (req.body.imageProfile) {
-        user.image_profile = req.body.imageProfile;
-      }
-      if (req.body.address) {
-        user.address = req.body.address;
-      }
-      if (req.body.height) {
-        user.height = req.body.height;
-      }
-      if (req.body.weight) {
-        user.weight = req.body.weight;
-      }
-      if (req.body.lifestyle) {
-        user.lifestyle = req.body.lifestyle;
-      }
-      if (req.body.sex) {
-        user.sex = req.body.sex;
-      }
-      if (req.body.sectionsEnabled) {
-        user.sections_enabled = req.body.sectionsEnabled;
-      }
-      if (req.body.logins) {
-        user.logins = req.body.logins;
-      }
-      if (req.body.mail) {
-        user.mail = req.body.mail;
-      }
-      if (req.body.password) {
-        user.password = req.body.password;
-      }
-      if (req.body.prefix) {
-        user.prefix = req.body.prefix;
-      }
-      if (req.body.tel_number) {
-        user.tel_number = req.body.tel_number;
-      }
-      if (req.body.contacts) {
-        user.contacts = req.body.contacts;
-      }
-      user.save(function(err) {
-        if (err) {
-          res.send(err);
-        } else {
-          res.json(user);
+      if (err) {
+        console.log(err);
+        res.json({
+          status: 500,
+          message: "Internal Server Error: DB error"
+        });
+      } else if (user) {
+        if (req.body.name) {
+          user.name = req.body.name;
         }
-      });
+        if (req.body.last_name) {
+          user.last_name = req.body.last_name;
+        }
+        if (req.body.birthday) {
+          user.birthday = req.body.birthday;
+        }
+        if (req.body.imageProfile) {
+          user.image_profile = req.body.imageProfile;
+        }
+        if (req.body.address) {
+          user.address = req.body.address;
+        }
+        if (req.body.height) {
+          user.height = req.body.height;
+        }
+        if (req.body.weight) {
+          user.weight = req.body.weight;
+        }
+        if (req.body.lifestyle) {
+          user.lifestyle = req.body.lifestyle;
+        }
+        if (req.body.sex) {
+          user.sex = req.body.sex;
+        }
+        if (req.body.sectionsEnabled) {
+          user.sections_enabled = req.body.sectionsEnabled;
+        }
+        if (req.body.logins) {
+          user.logins = req.body.logins;
+        }
+        if (req.body.mail) {
+          user.mail = req.body.mail;
+        }
+        if (req.body.password) {
+          user.password = req.body.password;
+        }
+        if (req.body.prefix) {
+          user.prefix = req.body.prefix;
+        }
+        if (req.body.tel_number) {
+          user.tel_number = req.body.tel_number;
+        }
+        user.save(function(err) {
+          if (err) {
+            console.log(err);
+            res.json({
+              status: 500,
+              message: "Internal Server Error: DB error"
+            });
+          } else {
+            res.json(user);
+          }
+        });
+      } else {
+        res.json({
+          status: 404,
+          message: "User not found"
+        });
+      }
     });
   } else {
     res.json({
-      message: "Cannot modify user without identifier"
+      status: 400,
+      message: "Missing parameters"
     });
   }
 });
@@ -213,18 +204,22 @@ router.route('/user').delete(function(req, res) {
       mail: req.body.mail
     }, function(err) {
       if (err) {
+        console.log(err);
         res.json({
-          message: "User could not be removed"
+          status: 500,
+          message: "Internal Server Error: DB error"
         });
       } else {
         res.json({
-          message: "User succesfully removed"
+          status: 200,
+          message: "OK"
         });
       }
     });
   } else {
     res.json({
-      message: "Cannot delete without identifier"
+      status: 400,
+      message: "Bad Request"
     });
   }
 });
@@ -236,16 +231,29 @@ router.route('/user/find').post(function(req, res) {
       mail: req.body.mail
     }).exec(function(err, user) {
       if (err) {
-				console.log(err);
-				res.json({status: 500, message: "db error"})
+        console.log(err);
+        res.json({
+          status: 500,
+          message: "Internal Server Error: DB error"
+        })
       } else if (user) {
-        res.json(user);
+        res.json({
+          status: 200,
+          message: "OK",
+          value: user
+        });
       } else {
-				res.json({status: 404, message: "User not found"});
-			}
+        res.json({
+          status: 404,
+          message: "User not found"
+        });
+      }
     });
   } else {
-    res.json({status: 500, message: "Missing parameters"});
+    res.json({
+      status: 400,
+      message: "Missing parameters"
+    });
   }
 });
 
@@ -256,24 +264,38 @@ router.route('/botverify').post(function(req, res) {
       mail: req.body.mail
     }).exec(function(err, user) {
       if (err) {
-        res.send(err);
-      } else {
+        console.log(err);
+        res.json({
+          status: 500,
+          message: "Internal Server Error: DB error"
+        });
+      } else if (user) {
         user.telegram_chat_id = req.body.chat_id;
         user.save(function(err) {
           if (err) {
-            res.send(err);
+            console.log(err);
+            res.json({
+              status: 500,
+              message: "Internal Server Error: DB error"
+            });
           } else {
             res.json({
               status: 200,
               message: "OK"
-            })
+            });
           }
+        });
+      } else {
+        res.json({
+          status: 404,
+          message: "User not found"
         });
       }
     });
   } else {
     res.json({
-      message: "Cannot find user without identifier"
+      status: 400,
+      message: "Missing parameters"
     });
   }
 });
@@ -285,24 +307,38 @@ router.route('/deviceverify').post(function(req, res) {
       mail: req.body.mail
     }).exec(function(err, user) {
       if (err) {
-        res.send(err);
-      } else {
+        console.log(err);
+        res.json({
+          status: 500,
+          message: "Internal Server Error: DB error"
+        });
+      } else if (user) {
         user.device_token = req.body.device_token;
         user.save(function(err) {
           if (err) {
-            res.send(err);
+            console.log(err);
+            res.json({
+              status: 500,
+              message: "Internal Server Error: DB error"
+            });
           } else {
             res.json({
               status: 200,
               message: "OK"
-            })
+            });
           }
+        });
+      } else {
+        res.json({
+          status: 404,
+          message: "User not found"
         });
       }
     });
   } else {
     res.json({
-      message: "Cannot find user without identifier"
+      status: 400,
+      message: "Missing parameters"
     });
   }
 });
@@ -314,8 +350,12 @@ router.route('/userpositions').post(function(req, res) {
       mail: req.body.mail
     }).exec(function(err, user) {
       if (err) {
-        res.send(err);
-      } else {
+        console.log(err);
+        res.json({
+          status: 500,
+          message: "Internal Server Error: DB error"
+        });
+      } else if (user) {
         var UserPos = new UserPosition();
         UserPos.position.coordinates = [parseFloat(req.body.lat), parseFloat(req.body.long)];
         UserPos.display_position.lat = parseFloat(req.body.lat);
@@ -326,22 +366,38 @@ router.route('/userpositions').post(function(req, res) {
           is_last: true
         }).exec(function(err, pos) {
           if (err) {
-            res.send(err);
+            console.log(err);
+            res.json({
+              status: 500,
+              message: "Internal Server Error: DB error"
+            });
           } else {
             if (pos) {
               pos.is_last = false;
               pos.save(function(err) {
                 if (err) {
-                  res.send(err);
+                  console.log(err);
+                  res.json({
+                    status: 500,
+                    message: "Internal Server Error: DB error"
+                  });
                 } else {
                   UserPos.save(function(err) {
                     if (err) {
-                      res.send(err);
+                      console.log(err);
+                      res.json({
+                        status: 500,
+                        message: "Internal Server Error: DB error"
+                      });
                     } else {
                       user.last_position = UserPos;
                       user.save(function(err) {
                         if (err) {
-                          res.send(err);
+                          console.log(err);
+                          res.json({
+                            status: 500,
+                            message: "Internal Server Error: DB error"
+                          });
                         } else {
                           res.json({
                             status: 200,
@@ -356,7 +412,11 @@ router.route('/userpositions').post(function(req, res) {
             } else {
               UserPos.save(function(err) {
                 if (err) {
-                  res.send(err);
+                  console.log(err);
+                  res.json({
+                    status: 500,
+                    message: "Internal Server Error: DB error"
+                  });
                 } else {
                   user.last_position = UserPos;
                   user.save(function(err) {
@@ -374,11 +434,17 @@ router.route('/userpositions').post(function(req, res) {
             }
           }
         });
+      } else {
+        res.json({
+          status: 404,
+          message: "User not found"
+        });
       }
     });
   } else {
     res.json({
-      message: "Cannot find user without identifier"
+      status: 400,
+      message: "Missing parameters"
     });
   }
 });
@@ -389,35 +455,43 @@ router.route('/apikey').post(function(req, res) {
       mail: req.body.mail
     }).exec(function(err, user) {
       if (err) {
-        res.send(err);
-      } else {
+        console.log(err);
+        res.json({
+          status: 500,
+          message: "Internal Server Error: DB error"
+        });
+      } else if (user) {
         var app = new AuthApplication();
         app.app_name = req.body.app_name;
         app.owner = user;
         app.save(function(err) {
           if (err) {
-            res.send(err);
+            console.log(err);
+            res.json({
+              status: 500,
+              message: "Internal Server Error: DB error"
+            });
           } else {
             res.json({
-              token: app.api_key
+              status: 201,
+              message: "Created",
+              value: app.api_key
             });
           }
+        });
+      } else {
+        res.json({
+          status: 404,
+          message: "User not found"
         });
       }
     });
   } else {
     res.json({
-      message: "Cannot find user without identifier"
+      status: 400,
+      message: "Missing parameters"
     });
   }
-});
-
-// API AI
-router.route('/apiairoute').post(function(req, res) {
-  // console.log('API AI');
-  // console.log(req.route.path);
-  // console.log(req);
-  res.json(req.body);
 });
 
 module.exports = router;
