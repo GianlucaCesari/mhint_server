@@ -25,23 +25,23 @@ router.route('/user').get(function(req, res) {
 });
 
 // GET USER By ID
-router.route('/user/:user_id').get(function(req, res) {
-  User.findById(req.params.user_id).populate({
-    path: 'positions',
-    options: {
-      limit: 2,
-      sort: {
-        'created_at': -1
-      }
-    }
-  }).exec(function(err, user) {
-    if (err) {
-      res.send(err);
-    } else {
-      res.json(user);
-    }
-  });
-});
+// router.route('/user/:user_id').get(function(req, res) {
+//   User.findById(req.params.user_id).populate({
+//     path: 'positions',
+//     options: {
+//       limit: 2,
+//       sort: {
+//         'created_at': -1
+//       }
+//     }
+//   }).exec(function(err, user) {
+//     if (err) {
+//       res.send(err);
+//     } else {
+//       res.json(user);
+//     }
+//   });
+// });
 
 // POST USER
 router.route('/user').post(function(req, res) {
@@ -234,17 +234,18 @@ router.route('/user/find').post(function(req, res) {
   if (req.body.mail) {
     User.find({
       mail: req.body.mail
-    }).populate('positions').exec(function(err, user) {
+    }).exec(function(err, user) {
       if (err) {
-        res.send(err);
-      } else {
+				console.log(err);
+				res.json({status: 500, message: "db error"})
+      } else if (user) {
         res.json(user);
-      }
+      } else {
+				res.json({status: 404, message: "User not found"});
+			}
     });
   } else {
-    res.json({
-      message: "Cannot find user without identifier"
-    });
+    res.json({status: 500, message: "Missing parameters"});
   }
 });
 

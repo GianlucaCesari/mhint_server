@@ -81,9 +81,10 @@ router.route('/need').post(function(req, res) {
           UserNeed.type = req.body.type;
         }
         var needCoordinates = [parseFloat(req.body.lat), parseFloat(req.body.long)];
-				UserNeed.display_position.lat = parseFloat(req.body.lat);
-				UserNeed.display_position.long = parseFloat(req.body.long);
+        UserNeed.display_position.lat = parseFloat(req.body.lat);
+        UserNeed.display_position.long = parseFloat(req.body.long);
         UserNeed.request_position.coordinates = needCoordinates;
+        var last24h = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
         UserPosition.findOne({
           is_last: true,
           position: {
@@ -94,6 +95,9 @@ router.route('/need').post(function(req, res) {
           },
           user_id: {
             $nin: user._id
+          },
+          created_at: {
+            "$gte": start
           }
         }).exec(function(err, pos) {
           if (err) {
@@ -117,28 +121,28 @@ router.route('/need').post(function(req, res) {
                     note.alert = "Hey " + nearUser.name + ", " + user.name + " needs: " + UserNeed.name + "!\nWill you help him?";
                     note.payload = {
                       'user': UserNeed.name,
-											'text': user.name +" needs: " + UserNeed.name + "!\nWill you help him?"
+                      'text': user.name + " needs: " + UserNeed.name + "!\nWill you help him?"
                     };
                     note.topic = "com.gianlucacesari.Mhint";
-										var date = new Date();
+                    var date = new Date();
                     apnProvider.send(note, deviceToken).then((result) => {
-											var status = "";
-											if (result.sent.length > 0) {
-												status = "SENT";
-											} else {
-												status = "FAILED";
-											}
-											console.log("["+date+"][PUSH NOTIFICATION][dev]["+status+"]["+nearUser.mail+"]");
+                      var status = "";
+                      if (result.sent.length > 0) {
+                        status = "SENT";
+                      } else {
+                        status = "FAILED";
+                      }
+                      console.log("[" + date + "][PUSH NOTIFICATION][dev][" + status + "][" + nearUser.mail + "]");
                       // console.log("notification: " + JSON.stringify(result));
                     });
                     apnProvider2.send(note, deviceToken).then((result) => {
-											var status = "";
-											if (result.sent.length > 0) {
-												status = "SENT";
-											} else {
-												status = "FAILED";
-											}
-											console.log("["+date+"][PUSH NOTIFICATION][prod]["+status+"]["+nearUser.mail+"]");
+                      var status = "";
+                      if (result.sent.length > 0) {
+                        status = "SENT";
+                      } else {
+                        status = "FAILED";
+                      }
+                      console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + nearUser.mail + "]");
                       // console.log("notification: " + JSON.stringify(result));
                     });
                     res.json({
@@ -178,39 +182,39 @@ router.route('/needresponse').post(function(req, res) {
           note.badge = 1;
           note.sound = "ping.aiff";
           if (req.body.status == 'accepted') {
-            note.alert = needrequest.user_receiver.name + " accepted your request for "+needrequest.name+"!";
-						note.payload = {
-	            'user': needrequest.name,
-	            'text': needrequest.user_receiver.name + ' accepted your request!'
-	          };
+            note.alert = needrequest.user_receiver.name + " accepted your request for " + needrequest.name + "!";
+            note.payload = {
+              'user': needrequest.name,
+              'text': needrequest.user_receiver.name + ' accepted your request!'
+            };
           } else {
-            note.alert = needrequest.user_receiver.name + " refused your request for "+needrequest.name+"!";
-						note.payload = {
-	            'user': needrequest.name,
-	            'text': needrequest.user_receiver.name + ' refused your request!'
-	          };
+            note.alert = needrequest.user_receiver.name + " refused your request for " + needrequest.name + "!";
+            note.payload = {
+              'user': needrequest.name,
+              'text': needrequest.user_receiver.name + ' refused your request!'
+            };
           }
 
           note.topic = "com.gianlucacesari.Mhint";
-					var date = new Date();
+          var date = new Date();
           apnProvider.send(note, deviceToken).then((result) => {
-						var status = "";
-						if (result.sent.length > 0) {
-							status = "SENT";
-						} else {
-							status = "FAILED";
-						}
-						console.log("["+date+"][PUSH NOTIFICATION][dev]["+status+"]["+needrequest.user_sender.mail+"]");
+            var status = "";
+            if (result.sent.length > 0) {
+              status = "SENT";
+            } else {
+              status = "FAILED";
+            }
+            console.log("[" + date + "][PUSH NOTIFICATION][dev][" + status + "][" + needrequest.user_sender.mail + "]");
             // console.log("notification: " + JSON.stringify(result));
           });
           apnProvider2.send(note, deviceToken).then((result) => {
-						var status = "";
-						if (result.sent.length > 0) {
-							status = "SENT";
-						} else {
-							status = "FAILED";
-						}
-						console.log("["+date+"][PUSH NOTIFICATION][prod]["+status+"]["+needrequest.user_sender.mail+"]");
+            var status = "";
+            if (result.sent.length > 0) {
+              status = "SENT";
+            } else {
+              status = "FAILED";
+            }
+            console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + needrequest.user_sender.mail + "]");
             // console.log("notification: " + JSON.stringify(result));
           });
           res.json({
@@ -237,7 +241,9 @@ router.route('/requests').get(function(req, res) {
           status: {
             $nin: ["completed", "refused"]
           }
-        }).populate('user_sender').sort({created_at:-1}).exec(function(err, reqs) {
+        }).populate('user_sender').sort({
+          created_at: -1
+        }).exec(function(err, reqs) {
           if (err) {
             res.send(err);
           } else {
@@ -266,7 +272,9 @@ router.route('/needs').get(function(req, res) {
           status: {
             $nin: "completed"
           }
-        }).populate('user_receiver').sort({created_at:-1}).exec(function(err, needs) {
+        }).populate('user_receiver').sort({
+          created_at: -1
+        }).exec(function(err, needs) {
           if (err) {
             res.send(err);
           } else {
@@ -282,57 +290,60 @@ router.route('/needs').get(function(req, res) {
   }
 });
 
-router.route('/needcomplete').post(function(req, res){
-	Need.findById(req.body.request_id).populate('user_receiver').populate('user_sender').exec(function(err, need){
-		if (err) {
-			res.send(err);
-		} else {
-			var notify = need.status == 'refused' ? false : true;
-			need.status = "completed";
-			need.save(function(err){
-				if (err) {
-					res.send(err);
-				} else {
-					if (notify) {
-						var note = new apn.Notification();
-						var deviceToken = need.user_receiver.device_token;
+router.route('/needcomplete').post(function(req, res) {
+  Need.findById(req.body.request_id).populate('user_receiver').populate('user_sender').exec(function(err, need) {
+    if (err) {
+      res.send(err);
+    } else {
+      var notify = need.status == 'refused' ? false : true;
+      need.status = "completed";
+      need.save(function(err) {
+        if (err) {
+          res.send(err);
+        } else {
+          if (notify) {
+            var note = new apn.Notification();
+            var deviceToken = need.user_receiver.device_token;
 
-						note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
-						note.badge = 1;
-						note.sound = "ping.aiff";
-						note.alert = "Hey " + need.user_receiver.name + ", " + need.user_sender.name + " doesn't need your help for " + need.name + " anymore!";
-						note.payload = {
-							'user': need.name,
-							'text': need.user_sender.name + " doesn't need your help anymore!"
-						};
-						note.topic = "com.gianlucacesari.Mhint";
-						var date = new Date();
-						apnProvider.send(note, deviceToken).then((result) => {
-							var status = "";
-							if (result.sent.length > 0) {
-								status = "SENT";
-							} else {
-								status = "FAILED";
-							}
-							console.log("["+date+"][PUSH NOTIFICATION][dev]["+status+"]["+need.user_receiver.mail+"]");
-							// console.log("notification: " + JSON.stringify(result));
-						});
-						apnProvider2.send(note, deviceToken).then((result) => {
-							var status = "";
-							if (result.sent.length > 0) {
-								status = "SENT";
-							} else {
-								status = "FAILED";
-							}
-							console.log("["+date+"][PUSH NOTIFICATION][prod]["+status+"]["+need.user_receiver.mail+"]");
-							// console.log("notification: " + JSON.stringify(result));
-						});
-					}
-					res.json({status: 200, message: "OK"});
-				}
-			});
-		}
-	});
+            note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
+            note.badge = 1;
+            note.sound = "ping.aiff";
+            note.alert = "Hey " + need.user_receiver.name + ", " + need.user_sender.name + " doesn't need your help for " + need.name + " anymore!";
+            note.payload = {
+              'user': need.name,
+              'text': need.user_sender.name + " doesn't need your help anymore!"
+            };
+            note.topic = "com.gianlucacesari.Mhint";
+            var date = new Date();
+            apnProvider.send(note, deviceToken).then((result) => {
+              var status = "";
+              if (result.sent.length > 0) {
+                status = "SENT";
+              } else {
+                status = "FAILED";
+              }
+              console.log("[" + date + "][PUSH NOTIFICATION][dev][" + status + "][" + need.user_receiver.mail + "]");
+              // console.log("notification: " + JSON.stringify(result));
+            });
+            apnProvider2.send(note, deviceToken).then((result) => {
+              var status = "";
+              if (result.sent.length > 0) {
+                status = "SENT";
+              } else {
+                status = "FAILED";
+              }
+              console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + need.user_receiver.mail + "]");
+              // console.log("notification: " + JSON.stringify(result));
+            });
+          }
+          res.json({
+            status: 200,
+            message: "OK"
+          });
+        }
+      });
+    }
+  });
 });
 
 module.exports = router;
