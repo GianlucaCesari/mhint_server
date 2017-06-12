@@ -243,8 +243,7 @@ router.route('/user/find').post(function(req, res) {
           value: user
         });
       } else {
-        res.json({
-          status: 404,
+        res.status(404).json({
           message: "User not found"
         });
       }
