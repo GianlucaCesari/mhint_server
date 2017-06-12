@@ -97,7 +97,7 @@ router.route('/need').post(function(req, res) {
             $nin: user._id
           },
           created_at: {
-            "$gte": start
+            "$gte": last24h
           }
         }).exec(function(err, pos) {
           if (err) {
