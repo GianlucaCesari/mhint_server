@@ -134,6 +134,7 @@ router.route('/need').post(function(req, res) {
 										}
 										nearUser.save();
 										badge = nearUser.push_num;
+
                     note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
                     note.badge = badge;
                     note.sound = "ping.aiff";
@@ -218,7 +219,7 @@ router.route('/needresponse').post(function(req, res) {
 						} else {
 							needrequest.user_sender.push_num = 1;
 						}
-						nearUser.save();
+						needrequest.user_sender.save();
 						badge = needrequest.user_sender.push_num;
 
             note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
@@ -386,7 +387,7 @@ router.route('/needcomplete').post(function(req, res) {
 							} else {
 								need.user_receiver.push_num = 1;
 							}
-							nearUser.save();
+							need.user_receiver.save();
 							badge = need.user_receiver.push_num;
 
               note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
