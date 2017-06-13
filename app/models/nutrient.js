@@ -3,8 +3,8 @@ var Schema = mongoose.Schema;
 
 var NutrientSchema = new Schema({
 	name: String,
-	amount: String,
-	value: Number,
+	unit: String,
+	amount: Number,
 	created_at: Date,
 	updated_at: Date
 });

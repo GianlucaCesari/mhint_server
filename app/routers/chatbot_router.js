@@ -63,159 +63,278 @@ router.route('/chat').post(function(req, res) {
           console.log(response);
           var resultChat = {
             text: "",
-            models: "",
+            model: "",
             obj: {}
           };
           //CHECK VALIDITY OF QUERY
           if (response.result.score > 0.6) {
-            //CHOOSE THE RIGHT ACTION
-            switch (response.result.action) {
-              case "show_grocery_list":
-                resultChat.models = "shopping_list";
-                ShoppingList.findOne({
-                  user: user._id,
-                  completed: false
-                }, {}, {
-                  sort: {
-                    'created_at': -1
-                  }
-                }).populate('items').exec(function(err, list) {
-                  if (err) {
-                    console.log(err);
-                    res.status(500).json({
-                      message: "Internal Server Error: DB error"
-                    });
-                  } else if (list) {
-                    resultChat.obj = list;
-                    resultChat.text = user.name + ", " + response.result.fulfillment.messages[0].speech;
-                    res.status(200).json(resultChat);
-                  } else {
-                    resultChat.text = user.name + ", " + response.result.fulfillment.messages[0].speech;
-                    res.status(200).json(resultChat);
-                  }
-                });
-                break;
-              case "add_grocery_list":
-                resultChat = response.result.fulfillment.messages[0].speech;
-                break;
-              case "remove_from_shopping_list":
-                resultChat = response.result.fulfillment.messages[0].speech;
-                break;
-              case "info_list":
-                resultChat = response.result.fulfillment.messages[0].speech;
-                break;
-              case "need_action":
-								resultChat.models = "need_action";
-                var UserNeed = new Need();
-                UserNeed.user_sender = user;
-                UserNeed.name = response.result.parameters.need_subject;
-                var needCoordinates = [parseFloat(req.body.lat), parseFloat(req.body.long)];
-                UserNeed.display_position.lat = parseFloat(req.body.lat);
-                UserNeed.display_position.long = parseFloat(req.body.long);
-                UserNeed.request_position.coordinates = needCoordinates;
-                var last24h = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
-                UserPosition.findOne({
-                  is_last: true,
-                  position: {
-                    $geoNear: {
-                      type: "Point",
-                      coordinates: needCoordinates
+            if (response.result.actionIncomplete) {
+              resultChat.text = response.result.fulfillment.messages[0].speech;
+              res.status(200).json(resultChat);
+            } else {
+              //CHOOSE THE RIGHT ACTION
+              switch (response.result.action) {
+                case "show_grocery_list":
+                  resultChat.model = "shopping_list";
+                  ShoppingList.findById(req.body.list_id).populate('items').exec(function(err, list) {
+                    if (err) {
+                      console.log(err);
+                      res.status(500).json({
+                        message: "Internal Server Error: DB error"
+                      });
+                    } else if (list) {
+                      resultChat.obj = list;
+                      resultChat.text = user.name + ", " + response.result.fulfillment.messages[0].speech;
+                      res.status(200).json(resultChat);
+                    } else {
+                      resultChat.text = user.name + ", " + response.result.fulfillment.messages[0].speech;
+                      res.status(200).json(resultChat);
                     }
-                  },
-                  user_id: {
-                    $nin: user._id
-                  },
-                  created_at: {
-                    "$gte": last24h
-                  }
-                }).exec(function(err, pos) {
-                  if (err) {
-                    console.log(err);
-                    res.status(500).json({
-                      message: "Internal Server Error: DB error"
-                    });
-                  } else if (pos) {
-                    User.findById(pos.user_id).exec(function(err, nearUser) {
-                      if (err) {
-                        console.log(err);
-                        res.status(500).json({
-                          message: "Internal Server Error: DB error"
-                        });
-                      } else if (nearUser) {
-                        UserNeed.user_receiver = nearUser;
-                        UserNeed.save(function(err) {
+                  });
+                  break;
+                case "add_grocery_list":
+                  resultChat.model = "add_item";
+                  ShoppingList.findById(req.body.list_id).populate('items').exec(function(err, list) {
+                    if (err) {
+                      console.log(err);
+                      res.status(500).json({
+                        message: "Internal Server Error: DB error"
+                      });
+                    } else if (list) {
+                      if (response.result.parameters.grocery_list_item_name.length <= 2) {
+                        var item = new ShoppingItem();
+                        var item2;
+                        item.name = response.result.parameters.grocery_list_item_name[0];
+                        item.value = response.result.parameters.grocery_list_item_quantity[0];
+                        item.unit = response.result.parameters.grocery_list_item_unity[0];
+                        if (response.result.parameters.grocery_list_item_name.length > 1) {
+                          item2 = new ShoppingItem();
+                          item2.name = response.result.parameters.grocery_list_item_name[1];
+                          item2.value = response.result.parameters.grocery_list_item_quantity[1];
+                          item2.unit = response.result.parameters.grocery_list_item_unity[1];
+                        }
+                        item.save(function(err) {
                           if (err) {
                             console.log(err);
                             res.status(500).json({
                               message: "Internal Server Error: DB error"
                             });
                           } else {
-                            var note = new apn.Notification();
-                            var deviceToken = nearUser.device_token;
-                            var badge = 0;
-                            if (nearUser.push_num) {
-                              nearUser.push_num = nearUser.push_num + 1;
+                            list.items.push(item);
+                            if (response.result.parameters.grocery_list_item_name.length > 1) {
+                              item2.save(function(err) {
+                                if (err) {
+                                  console.log(err);
+                                  res.status(500).json({
+                                    message: "Internal Server Error: DB error"
+                                  });
+                                } else {
+                                  list.items.push(item2);
+                                  list.save(function(err) {
+                                    if (err) {
+                                      console.log(err);
+                                      res.status(500).json({
+                                        message: "Internal Server Error: DB error"
+                                      });
+                                    } else {
+                                      resultChat.obj = list;
+                                      resultChat.text = response.result.fulfillment.messages[0].speech;
+                                      res.status(200).json(resultChat);
+                                    }
+                                  });
+                                }
+                              });
                             } else {
-                              nearUser.push_num = 1;
+                              list.save(function(err) {
+                                if (err) {
+                                  console.log(err);
+                                  res.status(500).json({
+                                    message: "Internal Server Error: DB error"
+                                  });
+                                } else {
+                                  resultChat.obj = list;
+                                  resultChat.text = response.result.fulfillment.messages[0].speech;
+                                  res.status(200).json(resultChat);
+                                }
+                              });
                             }
-                            nearUser.save();
-                            badge = nearUser.push_num;
-
-                            note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
-                            note.badge = badge;
-                            note.sound = "ping.aiff";
-                            note.alert = "Hey " + nearUser.name + ", " + user.name + " needs: " + UserNeed.name + "!\nWill you help him?";
-                            note.payload = {
-                              'user': UserNeed.name,
-                              'text': user.name + " needs: " + UserNeed.name + "!\nWill you help him?"
-                            };
-                            note.topic = "com.gianlucacesari.Mhint";
-                            var date = new Date();
-                            apnProvider.send(note, deviceToken).then((result) => {
-                              var status = "";
-                              if (result.sent.length > 0) {
-                                status = "SENT";
-                              } else {
-                                status = "FAILED";
-                              }
-                              console.log("[" + date + "][PUSH NOTIFICATION][dev][" + status + "][" + nearUser.mail + "]");
-                              // console.log("notification: " + JSON.stringify(result));
-                            });
-                            apnProvider2.send(note, deviceToken).then((result) => {
-                              var status = "";
-                              if (result.sent.length > 0) {
-                                status = "SENT";
-                              } else {
-                                status = "FAILED";
-                              }
-                              console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + nearUser.mail + "]");
-                              // console.log("notification: " + JSON.stringify(result));
-                            });
-														resultChat.text = response.result.fulfillment.messages[0].speech;
-														resultChat.obj = UserNeed;
-                            res.status(200).json(resultChat);
                           }
                         });
                       } else {
-												resultChat.text = "Sorry "+user.name+", I can't find available pepole!";
-												res.status(200).json(resultChat);
+                        resultChat.text = "Sorry, I can't add more then two items per time";
+                        res.status(200).json(resultChat);
                       }
-                    });
-                  } else {
-										resultChat.text = "Sorry "+user.name+", I can't find available pepole!";
-										res.status(200).json(resultChat);
-                  }
-                });
-                // resultChat = response.result.fulfillment.messages[0].speech;
-                break;
-              case "remind_grocery_shopping": //NSFW
+                    } else {
+                      resultChat.text = "Sorry " + user.name + ", I can't do it yet.";
+                      res.status(200).json(resultChat);
+                    }
+                  });
+                  break;
+                case "remove_from_shopping_list":
+									resultChat.model = "remove_item";
+                  ShoppingList.findById(req.body.list_id).populate('items').exec(function(err, list) {
+                    if (err) {
+                      console.log(err);
+                      res.status(500).json({
+                        message: "Internal Server Error: DB error"
+                      });
+                    } else if (list) {
+                      var found = false;
+                      for (i = 0; i < list.items.length; i++) {
+												console.log(list.items[i].name);
+                        if (list.items[i].name.toLowerCase() == response.result.parameters.grocery_list_item_name[0].toLowerCase()) {
+                          found = true;
+                          var item_id = list.items[i]._id;
+                          ShoppingItem.findById(item_id).exec(function(err, item) {
+                            if (err) {
+                              console.log(err);
+                              res.status(500).json({
+                                message: "Internal Server Error: DB error"
+                              });
+                            } else if (item) {
+                              item.checked = true;
+                              item.save(function(err) {
+                                if (err) {
+                                  console.log(err);
+                                  res.status(500).json({
+                                    message: "Internal Server Error: DB error"
+                                  });
+                                } else {
+                                  resultChat.text = item.name + " checked!";
+                                  res.status(200).json(resultChat);
+                                }
+                              });
+                            }
+                          });
+                        }
+                      }
+                      // if (!found) {
+                      //   resultChat.text = "I couldn't find " + response.result.parameters.grocery_list_item_name[0] + " in your list.";
+                      //   res.status(200).json(resultChat);
+                      // }
+                    } else {
+                      resultChat.text = "Hey " + user.name + ", you don't have a list yet!";
+                      res.status(200).json(resultChat);
+                    }
+                  });
+                  break;
+                case "info_list":
+                  resultChat.text = response.result.fulfillment.messages[0].speech;
+                  res.status(200).json(resultChat);
+                  break;
+                case "need_action":
+                  resultChat.model = "need_action";
+                  var UserNeed = new Need();
+                  UserNeed.user_sender = user;
+                  UserNeed.name = response.result.parameters.need_subject;
+                  var needCoordinates = [parseFloat(req.body.lat), parseFloat(req.body.long)];
+                  UserNeed.display_position.lat = parseFloat(req.body.lat);
+                  UserNeed.display_position.long = parseFloat(req.body.long);
+                  UserNeed.request_position.coordinates = needCoordinates;
+                  var last24h = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
+                  UserPosition.findOne({
+                    is_last: true,
+                    position: {
+                      $geoNear: {
+                        type: "Point",
+                        coordinates: needCoordinates
+                      }
+                    },
+                    user_id: {
+                      $nin: user._id
+                    },
+                    created_at: {
+                      "$gte": last24h
+                    }
+                  }).exec(function(err, pos) {
+                    if (err) {
+                      console.log(err);
+                      res.status(500).json({
+                        message: "Internal Server Error: DB error"
+                      });
+                    } else if (pos) {
+                      User.findById(pos.user_id).exec(function(err, nearUser) {
+                        if (err) {
+                          console.log(err);
+                          res.status(500).json({
+                            message: "Internal Server Error: DB error"
+                          });
+                        } else if (nearUser) {
+                          UserNeed.user_receiver = nearUser;
+                          UserNeed.save(function(err) {
+                            if (err) {
+                              console.log(err);
+                              res.status(500).json({
+                                message: "Internal Server Error: DB error"
+                              });
+                            } else {
+                              var note = new apn.Notification();
+                              var deviceToken = nearUser.device_token;
+                              var badge = 0;
+                              if (nearUser.push_num) {
+                                nearUser.push_num = nearUser.push_num + 1;
+                              } else {
+                                nearUser.push_num = 1;
+                              }
+                              nearUser.save();
+                              badge = nearUser.push_num;
 
-                resultChat = response.result.fulfillment.messages[0].speech;
-                break;
-              default:
-                // DEFAULT FALLBACK RESPONSES (RANDOM)
-                resultChat.text = "Sorry " + user.name + ", I'm not sure how to help with that.";
-                res.status(200).json(resultChat);
+                              note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
+                              note.badge = badge;
+                              note.sound = "ping.aiff";
+                              note.alert = "Hey " + nearUser.name + ", " + user.name + " needs: " + UserNeed.name + "!\nWill you help him?";
+                              note.payload = {
+                                'user': UserNeed.name,
+                                'text': user.name + " needs: " + UserNeed.name + "!\nWill you help him?"
+                              };
+                              note.topic = "com.gianlucacesari.Mhint";
+                              var date = new Date();
+                              apnProvider.send(note, deviceToken).then((result) => {
+                                var status = "";
+                                if (result.sent.length > 0) {
+                                  status = "SENT";
+                                } else {
+                                  status = "FAILED";
+                                }
+                                console.log("[" + date + "][PUSH NOTIFICATION][dev][" + status + "][" + nearUser.mail + "]");
+                                // console.log("notification: " + JSON.stringify(result));
+                              });
+                              apnProvider2.send(note, deviceToken).then((result) => {
+                                var status = "";
+                                if (result.sent.length > 0) {
+                                  status = "SENT";
+                                } else {
+                                  status = "FAILED";
+                                }
+                                console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + nearUser.mail + "]");
+                                // console.log("notification: " + JSON.stringify(result));
+                              });
+                              resultChat.text = response.result.fulfillment.messages[0].speech;
+                              resultChat.obj = UserNeed;
+                              res.status(200).json(resultChat);
+                            }
+                          });
+                        } else {
+                          resultChat.text = "Sorry " + user.name + ", I can't find available pepole!";
+                          res.status(200).json(resultChat);
+                        }
+                      });
+                    } else {
+                      resultChat.text = "Sorry " + user.name + ", I can't find available pepole!";
+                      res.status(200).json(resultChat);
+                    }
+                  });
+                  // resultChat = response.result.fulfillment.messages[0].speech;
+                  break;
+                case "remind_grocery_shopping": //NSFW
+
+                  resultChat = response.result.fulfillment.messages[0].speech;
+                  break;
+                default:
+                  // DEFAULT FALLBACK RESPONSES (RANDOM)
+                  resultChat.text = "Sorry " + user.name + ", I'm not sure how to help with that.";
+                  res.status(200).json(resultChat);
+              }
             }
           } else {
             // DEFAULT FALLBACK RESPONSES (RANDOM)
