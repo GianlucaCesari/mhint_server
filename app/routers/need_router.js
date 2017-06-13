@@ -71,8 +71,11 @@ router.route('/need').post(function(req, res) {
       mail: req.body.mail
     }).exec(function(err, user) {
       if (err) {
-        res.send(err);
-      } else {
+        console.log(err);
+        res.status(500).json({
+          message: "Internal Server Error: DB error"
+        });
+      } else if (user) {
         var UserNeed = new Need();
         UserNeed.user_sender = user;
         UserNeed.name = req.body.name;
@@ -101,22 +104,38 @@ router.route('/need').post(function(req, res) {
           }
         }).exec(function(err, pos) {
           if (err) {
-            res.send(err);
-          } else {
+            console.log(err);
+            res.status(500).json({
+              message: "Internal Server Error: DB error"
+            });
+          } else if (pos) {
             User.findById(pos.user_id).exec(function(err, nearUser) {
               if (err) {
-                res.send(err);
-              } else {
+                console.log(err);
+                res.status(500).json({
+                  message: "Internal Server Error: DB error"
+                });
+              } else if (nearUser) {
                 UserNeed.user_receiver = nearUser;
                 UserNeed.save(function(err) {
                   if (err) {
-                    res.send(err);
+                    console.log(err);
+                    res.status(500).json({
+                      message: "Internal Server Error: DB error"
+                    });
                   } else {
                     var note = new apn.Notification();
                     var deviceToken = nearUser.device_token;
-
+										var badge = 0;
+										if (nearUser.push_num) {
+											nearUser.push_num = nearUser.push_num + 1;
+										} else {
+											nearUser.push_num = 1;
+										}
+										nearUser.save();
+										badge = nearUser.push_num;
                     note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
-                    note.badge = 1;
+                    note.badge = badge;
                     note.sound = "ping.aiff";
                     note.alert = "Hey " + nearUser.name + ", " + user.name + " needs: " + UserNeed.name + "!\nWill you help him?";
                     note.payload = {
@@ -145,87 +164,119 @@ router.route('/need').post(function(req, res) {
                       console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + nearUser.mail + "]");
                       // console.log("notification: " + JSON.stringify(result));
                     });
-                    res.json({
-                      status: 200,
-                      message: "OK",
+                    res.status(201).json({
+                      message: "Created",
                       value: UserNeed
                     });
                   }
                 });
+              } else {
+                res.status(404).json({
+                  message: "Not found available User"
+                });
               }
             });
+          } else {
+            res.status(404).json({
+              message: "Not found available User"
+            });
           }
+        });
+      } else {
+        res.status(404).json({
+          message: "User not found"
         });
       }
     });
   } else {
-    res.json({
-      message: "Cannot modify user without identifier"
+    res.status(400).json({
+      message: "Missing parameters"
     });
   }
 });
 
 router.route('/needresponse').post(function(req, res) {
-  Need.findById(req.body.request_id).populate('user_receiver').populate('user_sender').exec(function(err, needrequest) {
-    if (err) {
-      res.send(err);
-    } else {
-      needrequest.status = req.body.status;
-      needrequest.save(function(err) {
-        if (err) {
-          res.send(err);
-        } else {
-          var note = new apn.Notification();
-          var deviceToken = needrequest.user_sender.device_token;
-
-          note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
-          note.badge = 1;
-          note.sound = "ping.aiff";
-          if (req.body.status == 'accepted') {
-            note.alert = needrequest.user_receiver.name + " accepted your request for " + needrequest.name + "!";
-            note.payload = {
-              'user': needrequest.name,
-              'text': needrequest.user_receiver.name + ' accepted your request!'
-            };
+  if (req.body.request_id) {
+    Need.findById(req.body.request_id).populate('user_receiver').populate('user_sender').exec(function(err, needrequest) {
+      if (err) {
+        res.status(500).json({
+          message: "Internal Server Error: DB error"
+        });
+      } else if (needrequest) {
+        needrequest.status = req.body.status;
+        needrequest.save(function(err) {
+          if (err) {
+            res.status(500).json({
+              message: "Internal Server Error: DB error"
+            });
           } else {
-            note.alert = needrequest.user_receiver.name + " refused your request for " + needrequest.name + "!";
-            note.payload = {
-              'user': needrequest.name,
-              'text': needrequest.user_receiver.name + ' refused your request!'
-            };
-          }
+            var note = new apn.Notification();
+            var deviceToken = needrequest.user_sender.device_token;
+						var badge = 0;
+						if (needrequest.user_sender.push_num) {
+							needrequest.user_sender.push_num = needrequest.user_sender.push_num + 1;
+						} else {
+							needrequest.user_sender.push_num = 1;
+						}
+						nearUser.save();
+						badge = needrequest.user_sender.push_num;
 
-          note.topic = "com.gianlucacesari.Mhint";
-          var date = new Date();
-          apnProvider.send(note, deviceToken).then((result) => {
-            var status = "";
-            if (result.sent.length > 0) {
-              status = "SENT";
+            note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
+            note.badge = badge;
+            note.sound = "ping.aiff";
+            if (req.body.status == 'accepted') {
+              note.alert = needrequest.user_receiver.name + " accepted your request for " + needrequest.name + "!";
+              note.payload = {
+                'user': needrequest.name,
+                'text': needrequest.user_receiver.name + ' accepted your request!'
+              };
             } else {
-              status = "FAILED";
+              note.alert = needrequest.user_receiver.name + " refused your request for " + needrequest.name + "!";
+              note.payload = {
+                'user': needrequest.name,
+                'text': needrequest.user_receiver.name + ' refused your request!'
+              };
             }
-            console.log("[" + date + "][PUSH NOTIFICATION][dev][" + status + "][" + needrequest.user_sender.mail + "]");
-            // console.log("notification: " + JSON.stringify(result));
-          });
-          apnProvider2.send(note, deviceToken).then((result) => {
-            var status = "";
-            if (result.sent.length > 0) {
-              status = "SENT";
-            } else {
-              status = "FAILED";
-            }
-            console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + needrequest.user_sender.mail + "]");
-            // console.log("notification: " + JSON.stringify(result));
-          });
-          res.json({
-            status: 200,
-            message: "OK",
-            value: needrequest
-          });
-        }
-      });
-    }
-  })
+
+            note.topic = "com.gianlucacesari.Mhint";
+            var date = new Date();
+            apnProvider.send(note, deviceToken).then((result) => {
+              var status = "";
+              if (result.sent.length > 0) {
+                status = "SENT";
+              } else {
+                status = "FAILED";
+              }
+              console.log("[" + date + "][PUSH NOTIFICATION][dev][" + status + "][" + needrequest.user_sender.mail + "]");
+              // console.log("notification: " + JSON.stringify(result));
+            });
+            apnProvider2.send(note, deviceToken).then((result) => {
+              var status = "";
+              if (result.sent.length > 0) {
+                status = "SENT";
+              } else {
+                status = "FAILED";
+              }
+              console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + needrequest.user_sender.mail + "]");
+              // console.log("notification: " + JSON.stringify(result));
+            });
+            res.status(200).json({
+              message: "OK",
+              value: needrequest
+            });
+          }
+        });
+      } else {
+        res.status(404).json({
+          message: "Need not found"
+        });
+      }
+    });
+  } else {
+    res.status(400).json({
+      message: "Missing parameters"
+    });
+  }
 });
 
 router.route('/requests').get(function(req, res) {
@@ -234,8 +285,10 @@ router.route('/requests').get(function(req, res) {
       mail: req.query.mail
     }).exec(function(err, user) {
       if (err) {
-        res.send(err);
-      } else {
+        res.status(500).json({
+          message: "Internal Server Error: DB error"
+        });
+      } else if (user) {
         Need.find({
           user_receiver: user._id,
           status: {
@@ -245,16 +298,24 @@ router.route('/requests').get(function(req, res) {
           created_at: -1
         }).exec(function(err, reqs) {
           if (err) {
-            res.send(err);
+            res.status(500).json({
+              message: "Internal Server Error: DB error"
+            });
+          } else if (reqs.length > 0) {
+            res.status(200).json(reqs);
           } else {
-            res.json(reqs);
+            res.status(404).json(reqs);
           }
+        });
+      } else {
+        res.status(404).json({
+          message: "User not found"
         });
       }
     });
   } else {
-    res.json({
-      message: "Cannot modify user without identifier"
+    res.status(400).json({
+      message: "Missing parameters"
     });
   }
 });
@@ -265,8 +326,10 @@ router.route('/needs').get(function(req, res) {
       mail: req.query.mail
     }).exec(function(err, user) {
       if (err) {
-        res.send(err);
-      } else {
+        res.status(500).json({
+          message: "Internal Server Error: DB error"
+        });
+      } else if (user) {
         Need.find({
           user_sender: user._id,
           status: {
@@ -276,74 +339,103 @@ router.route('/needs').get(function(req, res) {
           created_at: -1
         }).exec(function(err, needs) {
           if (err) {
-            res.send(err);
+            res.status(500).json({
+              message: "Internal Server Error: DB error"
+            });
+          } else if (needs.length > 0) {
+            res.status(200).json(needs);
           } else {
-            res.json(needs);
+            res.status(404).json(needs);
           }
+        });
+      } else {
+        res.status(404).json({
+          message: "User not found"
         });
       }
     });
   } else {
-    res.json({
-      message: "Cannot modify user without identifier"
+    res.status(400).json({
+      message: "Missing parameters"
     });
   }
 });
 
 router.route('/needcomplete').post(function(req, res) {
-  Need.findById(req.body.request_id).populate('user_receiver').populate('user_sender').exec(function(err, need) {
-    if (err) {
-      res.send(err);
-    } else {
-      var notify = need.status == 'refused' ? false : true;
-      need.status = "completed";
-      need.save(function(err) {
-        if (err) {
-          res.send(err);
-        } else {
-          if (notify) {
-            var note = new apn.Notification();
-            var deviceToken = need.user_receiver.device_token;
-
-            note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
-            note.badge = 1;
-            note.sound = "ping.aiff";
-            note.alert = "Hey " + need.user_receiver.name + ", " + need.user_sender.name + " doesn't need your help for " + need.name + " anymore!";
-            note.payload = {
-              'user': need.name,
-              'text': need.user_sender.name + " doesn't need your help anymore!"
-            };
-            note.topic = "com.gianlucacesari.Mhint";
-            var date = new Date();
-            apnProvider.send(note, deviceToken).then((result) => {
-              var status = "";
-              if (result.sent.length > 0) {
-                status = "SENT";
-              } else {
-                status = "FAILED";
-              }
-              console.log("[" + date + "][PUSH NOTIFICATION][dev][" + status + "][" + need.user_receiver.mail + "]");
-              // console.log("notification: " + JSON.stringify(result));
+  if (req.body.request_id) {
+    Need.findById(req.body.request_id).populate('user_receiver').populate('user_sender').exec(function(err, need) {
+      if (err) {
+        res.status(500).json({
+          message: "Internal Server Error: DB error"
+        });
+      } else if (need) {
+        var notify = need.status == 'refused' ? false : true;
+        need.status = "completed";
+        need.save(function(err) {
+          if (err) {
+            res.status(500).json({
+              message: "Internal Server Error: DB error"
             });
-            apnProvider2.send(note, deviceToken).then((result) => {
-              var status = "";
-              if (result.sent.length > 0) {
-                status = "SENT";
-              } else {
-                status = "FAILED";
-              }
-              console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + need.user_receiver.mail + "]");
-              // console.log("notification: " + JSON.stringify(result));
+          } else {
+            if (notify) {
+              var note = new apn.Notification();
+              var deviceToken = need.user_receiver.device_token;
+							var badge = 0;
+							if (need.user_receiver.push_num) {
+								need.user_receiver.push_num = need.user_receiver.push_num + 1;
+							} else {
+								need.user_receiver.push_num = 1;
+							}
+							nearUser.save();
+							badge = need.user_receiver.push_num;
+
+              note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
+              note.badge = badge;
+              note.sound = "ping.aiff";
+              note.alert = "Hey " + need.user_receiver.name + ", " + need.user_sender.name + " doesn't need your help for " + need.name + " anymore!";
+              note.payload = {
+                'user': need.name,
+                'text': need.user_sender.name + " doesn't need your help anymore!"
+              };
+              note.topic = "com.gianlucacesari.Mhint";
+              var date = new Date();
+              apnProvider.send(note, deviceToken).then((result) => {
+                var status = "";
+                if (result.sent.length > 0) {
+                  status = "SENT";
+                } else {
+                  status = "FAILED";
+                }
+                console.log("[" + date + "][PUSH NOTIFICATION][dev][" + status + "][" + need.user_receiver.mail + "]");
+                // console.log("notification: " + JSON.stringify(result));
+              });
+              apnProvider2.send(note, deviceToken).then((result) => {
+                var status = "";
+                if (result.sent.length > 0) {
+                  status = "SENT";
+                } else {
+                  status = "FAILED";
+                }
+                console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + need.user_receiver.mail + "]");
+                // console.log("notification: " + JSON.stringify(result));
+              });
+            }
+            res.status(200).json({
+              message: "OK"
             });
           }
-          res.json({
-            status: 200,
-            message: "OK"
-          });
-        }
-      });
-    }
-  });
+        });
+      } else {
+        res.status(404).json({
+          message: "Need not found"
+        });
+      }
+    });
+  } else {
+    res.status(400).json({
+      message: "Missing parameters"
+    });
+  }
 });
 
 module.exports = router;

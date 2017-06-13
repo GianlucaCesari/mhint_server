@@ -27,7 +27,12 @@ router.route('/foods').post(function(req, res) {
     Category.findOne({
       name: req.body.category
     }).exec(function(err, category) {
-      if (category != null) {
+      if (err) {
+        console.log(err);
+        res.status(500).json({
+          message: "Internal Server Error: DB error"
+        });
+      } else if (category != null) {
         food.category = category.id;
       } else {
         var newCat = new Category({
@@ -43,9 +48,12 @@ router.route('/foods').post(function(req, res) {
       }
       food.save(function(err) {
         if (err) {
-          res.send(err);
+          console.log(err);
+          res.status(500).json({
+            message: "Internal Server Error: DB error"
+          });
         } else {
-          res.json({
+          res.status(201).json({
             message: "Created",
             value: food
           });
@@ -53,8 +61,8 @@ router.route('/foods').post(function(req, res) {
       });
     });
   } else {
-    res.json({
-      message: "invalid access token"
+    res.status(401).json({
+      message: "Unauthorized: Invalid Access Token"
     });
   }
 });
@@ -62,21 +70,43 @@ router.route('/foods').post(function(req, res) {
 router.route('/foods').get(function(req, res) {
   Food.find().exec(function(err, foods) {
     if (err) {
-      res.send(err);
+      console.log(err);
+      res.status(500).json({
+        message: "Internal Server Error: DB error"
+      });
     } else {
-      res.json(foods);
+      res.status(200).json({
+        message: "OK",
+        value: foods
+      });
     }
   });
 });
 
 router.route('/foods').get(function(req, res) {
-  Food.findById(req.query.id, function(err, food) {
-    if (err) {
-      res.send(err);
-    } else {
-      res.json(food);
-    }
-  });
+  if (req.query.id) {
+    Food.findById(req.query.id, function(err, food) {
+      if (err) {
+        console.log(err);
+        res.status(500).json({
+          message: "Internal Server Error: DB error"
+        });
+      } else if (food) {
+        res.status(200).json({
+          message: "OK",
+          value: food
+        });
+      } else {
+        res.status(404).json({
+          message: "Food not found"
+        });
+      }
+    });
+  } else {
+    res.status(400).json({
+      message: "Missing parameters"
+    });
+  }
 });
 
 router.route('/foodpreference').get(function(req, res) {
@@ -87,14 +117,21 @@ router.route('/foodpreference').get(function(req, res) {
       }
     }).limit(10).exec(function(err, foods) {
       if (err) {
-        res.send(err);
+        console.log(err);
+        res.status(500).json({
+          message: "Internal Server Error: DB error"
+        });
+      } else if (foods.length > 0) {
+        res.status(200).json(foods);
       } else {
-        res.json(foods);
+        res.status(404).json({
+          message: "Foods not found"
+        });
       }
     })
   } else {
-    res.json({
-      message: "Cannot modify user without identifier"
+    res.status(400).json({
+      message: "Missing parameters"
     });
   }
 });
@@ -103,23 +140,32 @@ router.route('/foodpreference').post(function(req, res) {
   if (req.body.mail) {
     Food.findById(req.body.food_id).exec(function(err, food) {
       if (err) {
-        res.send(err);
-      } else {
+        console.log(err);
+        res.status(500).json({
+          message: "Internal Server Error: DB error"
+        });
+      } else if (food) {
         var user_preference = new UserPreference();
         user_preference.user_mail = req.body.mail;
         user_preference.food = req.body.food_id;
         user_preference.type = req.body.type;
         user_preference.save(function(err) {
           if (err) {
-            res.send(err);
+            console.log(err);
+            res.status(500).json({
+              message: "Internal Server Error: DB error"
+            });
           } else {
             food.user_preference = food.user_preference || [];
             food.user_preference.push(req.body.mail);
             food.save(function(err) {
               if (err) {
-                res.send(err);
+                console.log(err);
+                res.status(500).json({
+                  message: "Internal Server Error: DB error"
+                });
               } else {
-                res.json({
+                res.status(200).json({
                   message: "Created",
                   value: user_preference
                 });
@@ -127,45 +173,49 @@ router.route('/foodpreference').post(function(req, res) {
             });
           }
         });
+      } else {
+        res.status(404).json({
+          message: "Food not found"
+        });
       }
     });
   } else {
-    res.json({
-      message: "Cannot modify user without identifier"
+    res.status(400).json({
+      message: "Missing parameters"
     });
   }
 });
 
-router.route('/fooduserpreferences').get(function(req, res) {
-  if (req.query.mail) {
-    if (req.query.type != undefined) {
-      UserPreference.find({
-        user_mail: req.query.mail,
-        type: req.query.type
-      }).populate('food').exec(function(err, user_preferences) {
-        if (err) {
-          res.send(err);
-        } else {
-          res.json(user_preferences);
-        }
-      });
-    } else {
-      UserPreference.find({
-        user_mail: req.query.mail
-      }).populate('food').exec(function(err, user_preferences) {
-        if (err) {
-          res.send(err);
-        } else {
-          res.json(user_preferences);
-        }
-      });
-    }
-  } else {
-    res.json({
-      message: "Cannot modify user without identifier"
-    });
-  }
-});
+// router.route('/fooduserpreferences').get(function(req, res) {
+//   if (req.query.mail) {
+//     if (req.query.type != undefined) {
+//       UserPreference.find({
+//         user_mail: req.query.mail,
+//         type: req.query.type
+//       }).populate('food').exec(function(err, user_preferences) {
+//         if (err) {
+//           res.send(err);
+//         } else {
+//           res.json(user_preferences);
+//         }
+//       });
+//     } else {
+//       UserPreference.find({
+//         user_mail: req.query.mail
+//       }).populate('food').exec(function(err, user_preferences) {
+//         if (err) {
+//           res.send(err);
+//         } else {
+//           res.json(user_preferences);
+//         }
+//       });
+//     }
+//   } else {
+//     res.json({
+//       message: "Cannot modify user without identifier"
+//     });
+//   }
+// });
 
 router.route('/weeklyplan').get(function(req, res) {
   if (req.query.mail) {
@@ -173,7 +223,10 @@ router.route('/weeklyplan').get(function(req, res) {
       mail: req.query.mail
     }).populate('allergens').populate('diet').exec(function(err, user) {
       if (err) {
-        res.send(err);
+        console.log(err);
+        res.status(500).json({
+          message: "Internal Server Error: DB error"
+        });
       } else {
         if (user) {
           var base_url = "https://spoonacular-recipe-food-nutrition-v1.p.mashape.com/recipes/mealplans/generate?";
@@ -190,9 +243,9 @@ router.route('/weeklyplan').get(function(req, res) {
           var url = base_url + diet + allergens + calories + "timeFrame=week";
           unirest.get(url).header("X-Mashape-Key", "a6eY3wNAkqmshOzAUe2Ox8diEDzvp1Ec6Fcjsnu0vMjcv5XAlE").header("Accept", "application/json").end(function(result) {
             var weekplan = new WeeklyPlan();
-						var shoppingList = new ShoppingList();
-						shoppingList.user = user._id;
-						shoppingList.items = [];
+            var shoppingList = new ShoppingList();
+            shoppingList.user = user._id;
+            shoppingList.items = [];
             weekplan.user = user._id;
             weekplan.items = [];
 
@@ -203,14 +256,15 @@ router.route('/weeklyplan').get(function(req, res) {
                   spoon_id: id
                 }).exec(function(err, recipe) {
                   if (err) {
+                    console.log(err);
                     array[i] = "err";
                     checkRecipeId(i + 1, array);
                   } else if (recipe) {
                     array[i] = {
-											recipe_id : recipe._id,
-											title: recipe.title,
-											img_url: recipe.img_url
-										};;
+                      recipe_id: recipe._id,
+                      title: recipe.title,
+                      img_url: recipe.img_url
+                    };;
                     checkRecipeId(i + 1, array);
                   } else {
                     var recipe_url = "https://spoonacular-recipe-food-nutrition-v1.p.mashape.com/recipes/" + id + "/information?includeNutrition=true";
@@ -226,6 +280,7 @@ router.route('/weeklyplan').get(function(req, res) {
                               spoon_id: id
                             }).exec(function(err, food) {
                               if (err) {
+                                console.log(err);
                                 arrayIng[j] = "err2";
                                 checkIngredientsId(j + 1, arrayIng, arrayNutr);
                               } else if (food) {
@@ -235,18 +290,18 @@ router.route('/weeklyplan').get(function(req, res) {
                                   unit: arrayIng[j].unit
                                 };
                                 arrayIng[j] = ing;
-																var sItem = new ShoppingItem;
-																sItem.name = food.name;
-																sItem.unit = arrayIng[j].unit;
-																sItem.value = arrayIng[j].amount;
-																sItem.save(function(err){
-																	if (err) {
-																		console.log(err);
-																	} else {
-																		shoppingList.items.push(sItem);
-																		checkIngredientsId(j + 1, arrayIng, arrayNutr);
-																	}
-																});
+                                var sItem = new ShoppingItem;
+                                sItem.name = food.name;
+                                sItem.unit = arrayIng[j].unit;
+                                sItem.value = arrayIng[j].amount;
+                                sItem.save(function(err) {
+                                  if (err) {
+                                    console.log(err);
+                                  } else {
+                                    shoppingList.items.push(sItem);
+                                    checkIngredientsId(j + 1, arrayIng, arrayNutr);
+                                  }
+                                });
                               } else {
                                 var newfood = new Food();
                                 newfood.name = arrayIng[j].name;
@@ -267,6 +322,7 @@ router.route('/weeklyplan').get(function(req, res) {
                                   newfood.nutrients = arrayNutr[j].nutrients;
                                   newfood.save(function(err) {
                                     if (err) {
+                                      console.log(err);
                                       arrayIng[j] = "err3";
                                       checkIngredientsId(j + 1, arrayIng, arrayNutr);
                                     } else {
@@ -276,18 +332,18 @@ router.route('/weeklyplan').get(function(req, res) {
                                         unit: arrayIng[j].unit
                                       };
                                       arrayIng[j] = ing;
-																			var sItem = new ShoppingItem;
-																			sItem.name = newfood.name;
-																			sItem.unit = arrayIng[j].unit;
-																			sItem.value = arrayIng[j].amount;
-																			sItem.save(function(err){
-																				if (err) {
-																					console.log(err);
-																				} else {
-																					shoppingList.items.push(sItem);
-																					checkIngredientsId(j + 1, arrayIng, arrayNutr);
-																				}
-																			});
+                                      var sItem = new ShoppingItem;
+                                      sItem.name = newfood.name;
+                                      sItem.unit = arrayIng[j].unit;
+                                      sItem.value = arrayIng[j].amount;
+                                      sItem.save(function(err) {
+                                        if (err) {
+                                          console.log(err);
+                                        } else {
+                                          shoppingList.items.push(sItem);
+                                          checkIngredientsId(j + 1, arrayIng, arrayNutr);
+                                        }
+                                      });
                                     }
                                   });
                                 });
@@ -297,14 +353,15 @@ router.route('/weeklyplan').get(function(req, res) {
                             newrecipe.ingredients = arrayIng;
                             newrecipe.save(function(err) {
                               if (err) {
+                                console.log(err);
                                 array[i] = "err4";
                                 checkRecipeId(i + 1, array);
                               } else {
                                 array[i] = {
-																	recipe_id : newrecipe._id,
-																	title: newrecipe.title,
-																	img_url: newrecipe.img_url
-																};
+                                  recipe_id: newrecipe._id,
+                                  title: newrecipe.title,
+                                  img_url: newrecipe.img_url
+                                };
                                 checkRecipeId(i + 1, array);
                               }
                             });
@@ -314,11 +371,11 @@ router.route('/weeklyplan').get(function(req, res) {
                         newrecipe.title = data.title;
                         newrecipe.img_url = data.image;
                         newrecipe.minutes = data.readyInMinutes;
-												if (data.instructions != null) {
-                        	newrecipe.instructions = data.instructions;
-												} else {
-													newrecipe.instructions = "";
-												}
+                        if (data.instructions != null) {
+                          newrecipe.instructions = data.instructions;
+                        } else {
+                          newrecipe.instructions = "";
+                        }
                         newrecipe.ingredients = [];
                         newrecipe.caloric_breakdown = data.nutrition.caloricBreakdown;
                         newrecipe.steps = data.analyzedInstructions;
@@ -327,6 +384,7 @@ router.route('/weeklyplan').get(function(req, res) {
                         var nutrArray = data.nutrition.ingredients;
                         checkIngredientsId(0, ingArray, nutrArray);
                       } else {
+                        console.log(err);
                         array[i] = "err1";
                         checkRecipeId(i + 1, array);
                       }
@@ -334,21 +392,24 @@ router.route('/weeklyplan').get(function(req, res) {
                   }
                 });
               } else {
-								shoppingList.save(function(err){
-									if (err) {
-										res.send(err);
-									} else {
-										weekplan.items = array;
-										weekplan.shopping_list = shoppingList._id;
-		                weekplan.save(function(err) {
-		                  if (err) {
-		                    res.send(err);
-		                  } else {
-		                    res.json(weekplan);
-		                  }
-		                });
-									}
-								});
+                shoppingList.save(function(err) {
+                  if (err) {
+                    res.send(err);
+                  } else {
+                    weekplan.items = array;
+                    weekplan.shopping_list = shoppingList._id;
+                    weekplan.save(function(err) {
+                      if (err) {
+                        console.log(err);
+                        res.status(500).json({
+                          message: "Internal Server Error: DB error"
+                        });
+                      } else {
+                        res.status(201).json(weekplan);
+                      }
+                    });
+                  }
+                });
               }
             }
             var recipes = [];
@@ -359,31 +420,38 @@ router.route('/weeklyplan').get(function(req, res) {
             checkRecipeId(0, recipes);
           });
         } else {
-          res.json({
-            message: "invalid user"
+          res.status(404).json({
+            message: "User not found"
           });
         }
       }
     });
   } else {
-    res.json({
-      message: "Cannot modify user without identifier"
+    res.status(400).json({
+      message: "Missing parameters"
     });
   }
 });
 
 router.route('/recipe').get(function(req, res) {
   if (req.query.id) {
-		Recipe.findById(req.query.id).populate('ingredients.food').exec(function(err, recipe){
-			if (err) {
-				res.send(err);
-			} else {
-				res.json(recipe);
-			}
-		});
+    Recipe.findById(req.query.id).populate('ingredients.food').exec(function(err, recipe) {
+      if (err) {
+        console.log(err);
+        res.status(500).json({
+          message: "Internal Server Error: DB error"
+        });
+      } else if (recipe) {
+        res.status(200).json(recipe);
+      } else {
+        res.status(404).json({
+          message: "Recipe not found"
+        });
+      }
+    });
   } else {
-    res.json({
-      message: "Cannot get recipe without identifier"
+    res.status(400).json({
+      message: "Missing parameters"
     });
   }
 });

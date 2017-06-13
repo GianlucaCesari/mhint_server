@@ -17,13 +17,11 @@ router.route('/user').get(function(req, res) {
   User.find({}).exec(function(err, users) {
     if (err) {
       console.log(err);
-      res.json({
-        status: 500,
+      res.status(500).json({
         message: "Internal Server Error: DB error"
       });
     } else {
-      res.json({
-        status: 200,
+      res.status(200).json({
         message: "OK",
         value: users
       });
@@ -39,8 +37,7 @@ router.route('/user').post(function(req, res) {
   }).exec(function(err, userFound) {
     if (err) {
       console.log(err);
-      res.json({
-        status: 500,
+      res.status(500).json({
         message: "Internal Server Error: DB error"
       });
     } else if (userFound) {
@@ -98,13 +95,11 @@ router.route('/user').post(function(req, res) {
     user.save(function(err) {
       if (err) {
         console.log(err);
-        res.json({
-          status: 500,
+        res.status(500).json({
           message: "Internal Server Error: DB error"
         })
       } else {
-        res.json({
-          status: 201,
+        res.status(201).json({
           message: "Created",
           value: user
         });
@@ -121,8 +116,7 @@ router.route('/user').put(function(req, res) {
     }, function(err, user) {
       if (err) {
         console.log(err);
-        res.json({
-          status: 500,
+        res.status(500).json({
           message: "Internal Server Error: DB error"
         });
       } else if (user) {
@@ -174,24 +168,24 @@ router.route('/user').put(function(req, res) {
         user.save(function(err) {
           if (err) {
             console.log(err);
-            res.json({
-              status: 500,
+            res.status(500).json({
               message: "Internal Server Error: DB error"
             });
           } else {
-            res.json(user);
+            res.status(200).json({
+              message: "OK",
+              value: user
+            });
           }
         });
       } else {
-        res.json({
-          status: 404,
+        res.status(404).json({
           message: "User not found"
         });
       }
     });
   } else {
-    res.json({
-      status: 400,
+    res.status(400).json({
       message: "Missing parameters"
     });
   }
@@ -205,20 +199,17 @@ router.route('/user').delete(function(req, res) {
     }, function(err) {
       if (err) {
         console.log(err);
-        res.json({
-          status: 500,
+        res.status(500).json({
           message: "Internal Server Error: DB error"
         });
       } else {
-        res.json({
-          status: 200,
+        res.status(200).json({
           message: "OK"
         });
       }
     });
   } else {
-    res.json({
-      status: 400,
+    res.status(400).json({
       message: "Bad Request"
     });
   }
@@ -227,18 +218,16 @@ router.route('/user').delete(function(req, res) {
 //  FIND User by MAIL
 router.route('/user/find').post(function(req, res) {
   if (req.body.mail) {
-    User.find({
+    User.findOne({
       mail: req.body.mail
     }).exec(function(err, user) {
       if (err) {
         console.log(err);
-        res.json({
-          status: 500,
+        res.status(500).json({
           message: "Internal Server Error: DB error"
         })
-      } else if (user.length > 0) {
-        res.json({
-          status: 200,
+      } else if (user) {
+        res.status(200).json({
           message: "OK",
           value: user
         });
@@ -249,8 +238,7 @@ router.route('/user/find').post(function(req, res) {
       }
     });
   } else {
-    res.json({
-      status: 400,
+    res.status(400).json({
       message: "Missing parameters"
     });
   }
@@ -264,8 +252,7 @@ router.route('/botverify').post(function(req, res) {
     }).exec(function(err, user) {
       if (err) {
         console.log(err);
-        res.json({
-          status: 500,
+        res.status(500).json({
           message: "Internal Server Error: DB error"
         });
       } else if (user) {
@@ -273,27 +260,23 @@ router.route('/botverify').post(function(req, res) {
         user.save(function(err) {
           if (err) {
             console.log(err);
-            res.json({
-              status: 500,
+            res.status(500).json({
               message: "Internal Server Error: DB error"
             });
           } else {
-            res.json({
-              status: 200,
+            res.status(200).json({
               message: "OK"
             });
           }
         });
       } else {
-        res.json({
-          status: 404,
+        res.status(404).json({
           message: "User not found"
         });
       }
     });
   } else {
-    res.json({
-      status: 400,
+    res.status(400).json({
       message: "Missing parameters"
     });
   }
@@ -307,8 +290,7 @@ router.route('/deviceverify').post(function(req, res) {
     }).exec(function(err, user) {
       if (err) {
         console.log(err);
-        res.json({
-          status: 500,
+        res.status(500).json({
           message: "Internal Server Error: DB error"
         });
       } else if (user) {
@@ -316,27 +298,23 @@ router.route('/deviceverify').post(function(req, res) {
         user.save(function(err) {
           if (err) {
             console.log(err);
-            res.json({
-              status: 500,
+            res.status(500).json({
               message: "Internal Server Error: DB error"
             });
           } else {
-            res.json({
-              status: 200,
+            res.status(200).json({
               message: "OK"
             });
           }
         });
       } else {
-        res.json({
-          status: 404,
+        res.status(404).json({
           message: "User not found"
         });
       }
     });
   } else {
-    res.json({
-      status: 400,
+    res.status(400).json({
       message: "Missing parameters"
     });
   }
@@ -350,8 +328,7 @@ router.route('/userpositions').post(function(req, res) {
     }).exec(function(err, user) {
       if (err) {
         console.log(err);
-        res.json({
-          status: 500,
+        res.status(500).json({
           message: "Internal Server Error: DB error"
         });
       } else if (user) {
@@ -366,8 +343,7 @@ router.route('/userpositions').post(function(req, res) {
         }).exec(function(err, pos) {
           if (err) {
             console.log(err);
-            res.json({
-              status: 500,
+            res.status(500).json({
               message: "Internal Server Error: DB error"
             });
           } else {
@@ -376,16 +352,14 @@ router.route('/userpositions').post(function(req, res) {
               pos.save(function(err) {
                 if (err) {
                   console.log(err);
-                  res.json({
-                    status: 500,
+                  res.status(500).json({
                     message: "Internal Server Error: DB error"
                   });
                 } else {
                   UserPos.save(function(err) {
                     if (err) {
                       console.log(err);
-                      res.json({
-                        status: 500,
+                      res.status(500).json({
                         message: "Internal Server Error: DB error"
                       });
                     } else {
@@ -393,13 +367,11 @@ router.route('/userpositions').post(function(req, res) {
                       user.save(function(err) {
                         if (err) {
                           console.log(err);
-                          res.json({
-                            status: 500,
+                          res.status(500).json({
                             message: "Internal Server Error: DB error"
                           });
                         } else {
-                          res.json({
-                            status: 200,
+                          res.status(200).json({
                             message: "OK"
                           });
                         }
@@ -412,18 +384,19 @@ router.route('/userpositions').post(function(req, res) {
               UserPos.save(function(err) {
                 if (err) {
                   console.log(err);
-                  res.json({
-                    status: 500,
+                  res.status(500).json({
                     message: "Internal Server Error: DB error"
                   });
                 } else {
                   user.last_position = UserPos;
                   user.save(function(err) {
                     if (err) {
-                      res.send(err);
+                      console.log(err);
+                      res.status(500).json({
+                        message: "Internal Server Error: DB error"
+                      });
                     } else {
-                      res.json({
-                        status: 200,
+                      res.status(200).json({
                         message: "OK"
                       });
                     }
@@ -434,15 +407,13 @@ router.route('/userpositions').post(function(req, res) {
           }
         });
       } else {
-        res.json({
-          status: 404,
+        res.status(404).json({
           message: "User not found"
         });
       }
     });
   } else {
-    res.json({
-      status: 400,
+    res.status(400).json({
       message: "Missing parameters"
     });
   }
@@ -455,8 +426,7 @@ router.route('/apikey').post(function(req, res) {
     }).exec(function(err, user) {
       if (err) {
         console.log(err);
-        res.json({
-          status: 500,
+        res.status(500).json({
           message: "Internal Server Error: DB error"
         });
       } else if (user) {
@@ -466,31 +436,57 @@ router.route('/apikey').post(function(req, res) {
         app.save(function(err) {
           if (err) {
             console.log(err);
-            res.json({
-              status: 500,
+            res.status(500).json({
               message: "Internal Server Error: DB error"
             });
           } else {
-            res.json({
-              status: 201,
+            res.status(201).json({
               message: "Created",
               value: app.api_key
             });
           }
         });
       } else {
-        res.json({
-          status: 404,
+        res.status(404).json({
           message: "User not found"
         });
       }
     });
   } else {
-    res.json({
-      status: 400,
+    res.status(400).json({
       message: "Missing parameters"
     });
   }
+});
+
+//reset Notification Number
+router.route('/resetnotification').post(function(req, res){
+	if (req.body.mail) {
+		User.findOne({mail: req.body.mail}).exec(function(err, user){
+			if (err){
+				console.log(err);
+				res.status(500).json({
+					message: "Internal Server Error: DB error"
+				});
+			} else if(user) {
+				user.push_num = 0;
+				user.save(function(err){
+					if (err) {
+						console.log(err);
+            res.status(500).json({
+              message: "Internal Server Error: DB error"
+            });
+					} else {
+						res.status(200).json({message: "OK"});
+					}
+				})
+			} else {
+				res.status(404).json({message: "User not found"});
+			}
+		});
+	} else {
+		res.status(400).json({message: "Missing parameters"});
+	}
 });
 
 module.exports = router;

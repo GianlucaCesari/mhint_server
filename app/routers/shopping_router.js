@@ -18,8 +18,11 @@ router.route('/shoppinglist').get(function(req, res) {
       mail: req.query.mail
     }).exec(function(err, user) {
       if (err) {
-        res.send(err);
-      } else {
+        console.log(err);
+        res.status(500).json({
+          message: "Internal Server Error: DB error"
+        });
+      } else if (user) {
         ShoppingList.findOne({
           user: user._id,
           completed: false
@@ -29,16 +32,23 @@ router.route('/shoppinglist').get(function(req, res) {
           }
         }).populate('items').exec(function(err, list) {
           if (err) {
-            res.send(err);
+            console.log(err);
+            res.status(500).json({
+              message: "Internal Server Error: DB error"
+            });
           } else {
-            res.json(list);
+            res.status(200).json(list);
           }
+        });
+      } else {
+        res.status(404).json({
+          message: "User not found"
         });
       }
     });
   } else {
-    res.json({
-      message: "Cannot modify user without identifier"
+    res.status(400).json({
+      message: "Missing parameters"
     });
   }
 });
@@ -50,8 +60,11 @@ router.route('/shoppinglist').post(function(req, res) {
       mail: req.body.mail
     }).exec(function(err, user) {
       if (err) {
-        res.send(err);
-      } else {
+        console.log(err);
+        res.status(500).json({
+          message: "Internal Server Error: DB error"
+        });
+      } else if (user) {
         var shoppingList = new ShoppingList();
         shoppingList.user = user._id;
         shoppingList.title = req.body.title;
@@ -70,61 +83,102 @@ router.route('/shoppinglist').post(function(req, res) {
         }
         shoppingList.save(function(err) {
           if (err) {
-            res.send(err);
+            console.log(err);
+            res.status(500).json({
+              message: "Internal Server Error: DB error"
+            });
           } else {
-            res.json({
-              status: 200,
-              message: "OK"
+            res.status(201).json({
+              message: "Created",
+              value: shoppingList
             });
           }
+        });
+      } else {
+        res.status(404).json({
+          message: "User not found"
         });
       }
     });
   } else {
-    res.json({
-      message: "Cannot modify user without identifier"
+    res.status(400).json({
+      message: "Missing parameters"
     });
   }
 });
 
 // complete list
 router.route('/listcomplete').post(function(req, res) {
-  ShoppingList.findById(req.body.list_id).exec(function(err, list) {
-    if (err) {
-      res.send(err);
-    } else {
-      list.completed = true;
-      list.completed_at = new Date();
-      list.save(function(err) {
-        if (err) {
-          res.send(err);
-        } else {
-          res.json({
-            status: 200,
-            message: "OK"
-          });
-        }
-      });
-    }
-  });
+  if (req.body.list_id) {
+    ShoppingList.findById(req.body.list_id).exec(function(err, list) {
+      if (err) {
+        console.log(err);
+        res.status(500).json({
+          message: "Internal Server Error: DB error"
+        });
+      } else if (list) {
+        list.completed = true;
+        list.completed_at = new Date();
+        list.save(function(err) {
+          if (err) {
+            console.log(err);
+            res.status(500).json({
+              message: "Internal Server Error: DB error"
+            });
+          } else {
+            res.status(200).json({
+              message: "OK"
+            });
+          }
+        });
+      } else {
+        res.status(404).json({
+          message: "List not found"
+        });
+      }
+    });
+  } else {
+    res.status(400).json({
+      message: "Missing parameters"
+    });
+  }
 });
 
 // complete item
 router.route('/itemchecked').post(function(req, res) {
-  ShoppingItem.findById(req.body.item_id).exec(function(err, item) {
-    if (err) {
-      res.send(err);
-    } else {
-      item.checked = req.body.checked;
-      item.save(function(err) {
-        if (err) {
-          res.send(err);
-        } else {
-          res.json(item);
-        }
-      });
-    }
-  });
+  if (req.body.item_id) {
+    ShoppingItem.findById(req.body.item_id).exec(function(err, item) {
+      if (err) {
+        console.log(err);
+        res.status(500).json({
+          message: "Internal Server Error: DB error"
+        });
+      } else if (item) {
+        item.checked = req.body.checked;
+        item.save(function(err) {
+          if (err) {
+            console.log(err);
+            res.status(500).json({
+              message: "Internal Server Error: DB error"
+            });
+          } else {
+            res.status(200).json({
+              message: "OK",
+              value: item
+            });
+          }
+        });
+      } else {
+        res.status(404).json({
+          message: "Item not found"
+        });
+      }
+    });
+  } else {
+    res.status(400).json({
+      message: "Missing parameters"
+    });
+  }
 });
 
 // add item
@@ -132,8 +186,11 @@ router.route('/additem').post(function(req, res) {
   if (req.body.list_id) {
     ShoppingList.findById(req.body.list_id).exec(function(err, list) {
       if (err) {
-        res.send(err);
-      } else {
+        console.log(err);
+        res.status(500).json({
+          message: "Internal Server Error: DB error"
+        });
+      } else if (list) {
         var item = new ShoppingItem();
         item.name = req.body.item.name;
         if (req.body.item.value) {
@@ -146,10 +203,17 @@ router.route('/additem').post(function(req, res) {
         list.items.push(item);
         list.save(function(err) {
           if (err) {
-            res.send(err);
+            console.log(err);
+            res.status(500).json({
+              message: "Internal Server Error: DB error"
+            });
           } else {
-            res.json(list);
+            res.status(200).json(list);
           }
+        });
+      } else {
+        res.status(404).json({
+          message: "List not found"
         });
       }
     });
@@ -158,8 +222,11 @@ router.route('/additem').post(function(req, res) {
       mail: req.body.mail
     }).exec(function(err, user) {
       if (err) {
-        res.send(err);
-      } else {
+        console.log(err);
+        res.status(500).json({
+          message: "Internal Server Error: DB error"
+        });
+      } else if (user) {
         var shoppingList = new ShoppingList();
         shoppingList.user = user._id;
         shoppingList.title = req.body.title;
@@ -176,15 +243,24 @@ router.route('/additem').post(function(req, res) {
         shoppingList.items.push(item);
         shoppingList.save(function(err) {
           if (err) {
-            res.send(err);
+            console.log(err);
+            res.status(500).json({
+              message: "Internal Server Error: DB error"
+            });
           }
         });
-				res.json(shoppingList);
+        res.status(201).json(shoppingList);
+      } else {
+        res.status(404).json({
+          message: "User not found"
+        });
       }
     });
   } else {
-		res.json({status: 400, message: "error"});
-	}
+    res.status(400).json({
+      message: "Missing parameters"
+    });
+  }
 });
 
 module.exports = router;

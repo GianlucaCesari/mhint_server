@@ -15,6 +15,7 @@ var UserSchema = new Schema({
     address: String,
     height: Number,
     weight: Number,
+		push_num: {type: Number, default: 0},
     lifestyle: Number,
     sex: {
         type: Number,
