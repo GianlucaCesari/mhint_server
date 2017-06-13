@@ -43,6 +43,7 @@ var router = express.Router();
 
 router.route('/chat').post(function(req, res) {
   if (req.body.mail) {
+		console.log(req.body);
     // api.ai connection
     var nlp = new apiai({
       token: "fb6d48f1ebf04969b8791576731e4f5b",
