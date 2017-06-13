@@ -126,14 +126,14 @@ router.route('/need').post(function(req, res) {
                   } else {
                     var note = new apn.Notification();
                     var deviceToken = nearUser.device_token;
-										var badge = 0;
-										if (nearUser.push_num) {
-											nearUser.push_num = nearUser.push_num + 1;
-										} else {
-											nearUser.push_num = 1;
-										}
-										nearUser.save();
-										badge = nearUser.push_num;
+                    var badge = 0;
+                    if (nearUser.push_num) {
+                      nearUser.push_num = nearUser.push_num + 1;
+                    } else {
+                      nearUser.push_num = 1;
+                    }
+                    nearUser.save();
+                    badge = nearUser.push_num;
 
                     note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
                     note.badge = badge;
@@ -213,14 +213,14 @@ router.route('/needresponse').post(function(req, res) {
           } else {
             var note = new apn.Notification();
             var deviceToken = needrequest.user_sender.device_token;
-						var badge = 0;
-						if (needrequest.user_sender.push_num) {
-							needrequest.user_sender.push_num = needrequest.user_sender.push_num + 1;
-						} else {
-							needrequest.user_sender.push_num = 1;
-						}
-						needrequest.user_sender.save();
-						badge = needrequest.user_sender.push_num;
+            var badge = 0;
+            if (needrequest.user_sender.push_num) {
+              needrequest.user_sender.push_num = needrequest.user_sender.push_num + 1;
+            } else {
+              needrequest.user_sender.push_num = 1;
+            }
+            needrequest.user_sender.save();
+            badge = needrequest.user_sender.push_num;
 
             note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
             note.badge = badge;
@@ -290,8 +290,8 @@ router.route('/requests').get(function(req, res) {
           message: "Internal Server Error: DB error"
         });
       } else if (user) {
-				user.push_num = 0;
-				user.save();
+        user.push_num = 0;
+        user.save();
         Need.find({
           user_receiver: user._id,
           status: {
@@ -333,8 +333,8 @@ router.route('/needs').get(function(req, res) {
           message: "Internal Server Error: DB error"
         });
       } else if (user) {
-				user.push_num = 0;
-				user.save();
+        user.push_num = 0;
+        user.save();
         Need.find({
           user_sender: user._id,
           status: {
@@ -385,49 +385,55 @@ router.route('/needcomplete').post(function(req, res) {
             if (notify) {
               var note = new apn.Notification();
               var deviceToken = need.user_receiver.device_token;
-							var badge = 0;
-							if (need.user_receiver.push_num) {
-								need.user_receiver.push_num = need.user_receiver.push_num + 1;
-							} else {
-								need.user_receiver.push_num = 1;
-							}
-							need.user_receiver.save();
-							badge = need.user_receiver.push_num;
-
-              note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
-              note.badge = badge;
-              note.sound = "ping.aiff";
-              note.alert = "Hey " + need.user_receiver.name + ", " + need.user_sender.name + " doesn't need your help for " + need.name + " anymore!";
-              note.payload = {
-                'user': need.name,
-                'text': need.user_sender.name + " doesn't need your help anymore!"
-              };
-              note.topic = "com.gianlucacesari.Mhint";
-              var date = new Date();
-              apnProvider.send(note, deviceToken).then((result) => {
-                var status = "";
-                if (result.sent.length > 0) {
-                  status = "SENT";
+              var badge = 0;
+              if (need.user_receiver.push_num) {
+                need.user_receiver.push_num = need.user_receiver.push_num + 1;
+              } else {
+                need.user_receiver.push_num = 1;
+              }
+              need.user_receiver.save(function(err) {
+                if (err) {
+                  res.status(500).json({
+                    message: "Internal Server Error: DB error"
+                  });
                 } else {
-                  status = "FAILED";
+                  badge = need.user_receiver.push_num;
+                  note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
+                  note.badge = badge;
+                  note.sound = "ping.aiff";
+                  note.alert = "Hey " + need.user_receiver.name + ", " + need.user_sender.name + " doesn't need your help for " + need.name + " anymore!";
+                  note.payload = {
+                    'user': need.name,
+                    'text': need.user_sender.name + " doesn't need your help anymore!"
+                  };
+                  note.topic = "com.gianlucacesari.Mhint";
+                  var date = new Date();
+                  apnProvider.send(note, deviceToken).then((result) => {
+                    var status = "";
+                    if (result.sent.length > 0) {
+                      status = "SENT";
+                    } else {
+                      status = "FAILED";
+                    }
+                    console.log("[" + date + "][PUSH NOTIFICATION][dev][" + status + "][" + need.user_receiver.mail + "]");
+                    // console.log("notification: " + JSON.stringify(result));
+                  });
+                  apnProvider2.send(note, deviceToken).then((result) => {
+                    var status = "";
+                    if (result.sent.length > 0) {
+                      status = "SENT";
+                    } else {
+                      status = "FAILED";
+                    }
+                    console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + need.user_receiver.mail + "]");
+                    // console.log("notification: " + JSON.stringify(result));
+                  });
+                  res.status(200).json({
+                    message: "OK"
+                  });
                 }
-                console.log("[" + date + "][PUSH NOTIFICATION][dev][" + status + "][" + need.user_receiver.mail + "]");
-                // console.log("notification: " + JSON.stringify(result));
-              });
-              apnProvider2.send(note, deviceToken).then((result) => {
-                var status = "";
-                if (result.sent.length > 0) {
-                  status = "SENT";
-                } else {
-                  status = "FAILED";
-                }
-                console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + need.user_receiver.mail + "]");
-                // console.log("notification: " + JSON.stringify(result));
               });
             }
-            res.status(200).json({
-              message: "OK"
-            });
           }
         });
       } else {
