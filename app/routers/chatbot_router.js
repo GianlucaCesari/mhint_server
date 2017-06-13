@@ -1,5 +1,6 @@
 var express = require('express');
 var apiai = require("api.ai");
+var apn = require('apn');
 
 
 //  require mongoose models
@@ -11,6 +12,27 @@ var Recipe = require('../models/recipe');
 var Need = require('../models/need');
 var Food = require('../models/food');
 var User = require('../models/user');
+
+var apnOptions = {
+  token: {
+    key: "./app/certs/APNsAuthKey_JYW3R384JL.p8",
+    keyId: "JYW3R384JL",
+    teamId: "L4KF22FNCY"
+  },
+  production: false
+};
+
+var apnOptions2 = {
+  token: {
+    key: "./app/certs/APNsAuthKey_JYW3R384JL.p8",
+    keyId: "JYW3R384JL",
+    teamId: "L4KF22FNCY"
+  },
+  production: true
+};
+
+var apnProvider = new apn.Provider(apnOptions);
+var apnProvider2 = new apn.Provider(apnOptions2);
 
 
 //  router init
