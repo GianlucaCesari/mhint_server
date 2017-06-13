@@ -60,7 +60,7 @@ router.route('/chat').post(function(req, res) {
         nlp.text(req.body.chat, {
           sessionId: req.body.mail
         }).then(function(response) {
-          console.log(response);
+          // console.log(response);
           var resultChat = {
             text: "",
             model: "",
@@ -181,7 +181,7 @@ router.route('/chat').post(function(req, res) {
                     } else if (list) {
                       var found = false;
                       for (i = 0; i < list.items.length; i++) {
-												console.log(list.items[i].name);
+												// console.log(list.items[i].name);
                         if (list.items[i].name.toLowerCase() == response.result.parameters.grocery_list_item_name[0].toLowerCase()) {
                           found = true;
                           var item_id = list.items[i]._id;
