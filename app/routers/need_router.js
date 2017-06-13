@@ -290,6 +290,8 @@ router.route('/requests').get(function(req, res) {
           message: "Internal Server Error: DB error"
         });
       } else if (user) {
+				user.push_num = 0;
+				user.save();
         Need.find({
           user_receiver: user._id,
           status: {
@@ -331,6 +333,8 @@ router.route('/needs').get(function(req, res) {
           message: "Internal Server Error: DB error"
         });
       } else if (user) {
+				user.push_num = 0;
+				user.save();
         Need.find({
           user_sender: user._id,
           status: {
