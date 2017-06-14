@@ -187,7 +187,7 @@ router.route('/chat').post(function(req, res) {
                   break;
                 case "remove_from_shopping_list":
                   resultChat.model = "remove_item";
-									console.log(response.result.parameters.grocery_list_item_name[0]);
+                  console.log(response.result.parameters.grocery_list_item_name[0]);
                   if (req.body.list_id) {
                     ShoppingList.findById(req.body.list_id).populate('items').exec(function(err, list) {
                       if (err) {
@@ -197,9 +197,9 @@ router.route('/chat').post(function(req, res) {
                         });
                       } else if (list) {
                         var found = false;
-                        for (i = 0; i < list.items.length; i++) {
+                        list.items.forEach(function(item, ind, array) {
                           // console.log(list.items[i].name);
-                          if (list.items[i].name.toLowerCase() == response.result.parameters.grocery_list_item_name[0].toLowerCase() && !list.items[i].checked) {
+                          if (item.name.toLowerCase() == response.result.parameters.grocery_list_item_name[0].toLowerCase() && !item.checked) {
                             found = true;
                             var item_id = list.items[i]._id;
                             ShoppingItem.findById(item_id).exec(function(err, item) {
@@ -217,14 +217,23 @@ router.route('/chat').post(function(req, res) {
                                       message: "Internal Server Error: DB error"
                                     });
                                   } else {
-                                    resultChat.text = item.name + " checked!";
-                                    res.status(200).json(resultChat);
+                                    // resultChat.text = item.name + " checked!";
+                                    // res.status(200).json(resultChat);
                                   }
                                 });
                               }
                             });
                           }
-                        }
+                          if (ind == array.length - 1) {
+                            if (found) {
+                              resultChat.text = response.result.parameters.grocery_list_item_name[0] + " checked!";
+                              res.status(200).json(resultChat);
+                            } else {
+                              resultChat.text = response.result.parameters.grocery_list_item_name[0] + " not found to checked!";
+                              res.status(200).json(resultChat)
+                            }
+                          }
+                        });
                         // if (!found) {
                         //   resultChat.text = "I couldn't find " + response.result.parameters.grocery_list_item_name[0] + " in your list.";
                         //   res.status(200).json(resultChat);
@@ -248,7 +257,7 @@ router.route('/chat').post(function(req, res) {
                   var UserNeed = new Need();
                   UserNeed.user_sender = user;
                   UserNeed.name = response.result.parameters.need_subject;
-									UserNeed.description = "";
+                  UserNeed.description = "";
                   var needCoordinates = [parseFloat(req.body.lat), parseFloat(req.body.long)];
                   UserNeed.display_position.lat = parseFloat(req.body.lat);
                   UserNeed.display_position.long = parseFloat(req.body.long);
