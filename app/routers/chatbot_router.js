@@ -74,7 +74,7 @@ router.route('/chat').post(function(req, res) {
             } else {
               //CHOOSE THE RIGHT ACTION
               switch (response.result.action) {
-                case "Default Welcome Intent":
+                case "input.welcome":
                   resultChat.model = "welcome_intent";
                   resultChat.text = response.result.fulfillment.messages[0].speech;
                   res.status(200).json(resultChat);
