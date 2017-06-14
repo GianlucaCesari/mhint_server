@@ -34,7 +34,7 @@ var apnProvider2 = new apn.Provider(apnOptions2);
 //  router init
 var router = express.Router();
 
-router.route('/notification').post(function(req, res){
+router.route('/admin/notification').post(function(req, res){
 	if (req.body.access_token == myToken) {
 		if (req.body.mail) {
 			User.findOne({mail: req.body.mail}).exec(function(err, user){
