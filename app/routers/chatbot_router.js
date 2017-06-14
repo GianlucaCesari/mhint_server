@@ -248,6 +248,7 @@ router.route('/chat').post(function(req, res) {
                   var UserNeed = new Need();
                   UserNeed.user_sender = user;
                   UserNeed.name = response.result.parameters.need_subject;
+									UserNeed.description = "";
                   var needCoordinates = [parseFloat(req.body.lat), parseFloat(req.body.long)];
                   UserNeed.display_position.lat = parseFloat(req.body.lat);
                   UserNeed.display_position.long = parseFloat(req.body.long);
