@@ -229,7 +229,7 @@ router.route('/chat').post(function(req, res) {
                               resultChat.text = response.result.parameters.grocery_list_item_name[0] + "? Consider it done!";
                               res.status(200).json(resultChat);
                             } else {
-                              resultChat.text = "I couldn't find any " response.result.parameters.grocery_list_item_name[0] + " to check on your list!";
+                              resultChat.text = "I couldn't find any "+ response.result.parameters.grocery_list_item_name[0] + " to check on your list!";
                               res.status(200).json(resultChat)
                             }
                           }
