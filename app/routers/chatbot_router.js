@@ -43,7 +43,6 @@ var router = express.Router();
 
 router.route('/chat').post(function(req, res) {
   if (req.body.mail) {
-		console.log(req.body);
     // api.ai connection
     var nlp = new apiai({
       token: "fb6d48f1ebf04969b8791576731e4f5b",
@@ -76,148 +75,164 @@ router.route('/chat').post(function(req, res) {
               //CHOOSE THE RIGHT ACTION
               switch (response.result.action) {
                 case "show_grocery_list":
+
                   resultChat.model = "shopping_list";
-                  ShoppingList.findById(req.body.list_id).populate('items').exec(function(err, list) {
-                    if (err) {
-                      console.log(err);
-                      res.status(500).json({
-                        message: "Internal Server Error: DB error"
-                      });
-                    } else if (list) {
-                      resultChat.obj = list;
-                      resultChat.text = user.name + ", " + response.result.fulfillment.messages[0].speech;
-                      res.status(200).json(resultChat);
-                    } else {
-                      resultChat.text = user.name + ", " + response.result.fulfillment.messages[0].speech;
-                      res.status(200).json(resultChat);
-                    }
-                  });
+                  if (req.body.list_id) {
+                    ShoppingList.findById(req.body.list_id).populate('items').exec(function(err, list) {
+                      if (err) {
+                        console.log(err);
+                        res.status(500).json({
+                          message: "Internal Server Error: DB error"
+                        });
+                      } else if (list) {
+                        resultChat.obj = list;
+                        resultChat.text = user.name + ", " + response.result.fulfillment.messages[0].speech;
+                        res.status(200).json(resultChat);
+                      } else {
+                        resultChat.text = user.name + ", " + response.result.fulfillment.messages[0].speech;
+                        res.status(200).json(resultChat);
+                      }
+                    });
+                  } else {
+                    resultChat.text = user.name + ", activate food section first";
+                    res.status(200).json(resultChat);
+                  }
                   break;
                 case "add_grocery_list":
                   resultChat.model = "add_item";
-                  ShoppingList.findById(req.body.list_id).populate('items').exec(function(err, list) {
-                    if (err) {
-                      console.log(err);
-                      res.status(500).json({
-                        message: "Internal Server Error: DB error"
-                      });
-                    } else if (list) {
-                      if (response.result.parameters.grocery_list_item_name.length <= 2) {
-                        var item = new ShoppingItem();
-                        var item2;
-                        item.name = response.result.parameters.grocery_list_item_name[0];
-                        item.value = response.result.parameters.grocery_list_item_quantity[0];
-                        item.unit = response.result.parameters.grocery_list_item_unity[0];
-                        if (response.result.parameters.grocery_list_item_name.length > 1) {
-                          item2 = new ShoppingItem();
-                          item2.name = response.result.parameters.grocery_list_item_name[1];
-                          item2.value = response.result.parameters.grocery_list_item_quantity[1];
-                          item2.unit = response.result.parameters.grocery_list_item_unity[1];
-                        }
-                        item.save(function(err) {
-                          if (err) {
-                            console.log(err);
-                            res.status(500).json({
-                              message: "Internal Server Error: DB error"
-                            });
-                          } else {
-                            list.items.push(item);
-                            if (response.result.parameters.grocery_list_item_name.length > 1) {
-                              item2.save(function(err) {
-                                if (err) {
-                                  console.log(err);
-                                  res.status(500).json({
-                                    message: "Internal Server Error: DB error"
-                                  });
-                                } else {
-                                  list.items.push(item2);
-                                  list.save(function(err) {
-                                    if (err) {
-                                      console.log(err);
-                                      res.status(500).json({
-                                        message: "Internal Server Error: DB error"
-                                      });
-                                    } else {
-                                      resultChat.obj = list;
-                                      resultChat.text = response.result.fulfillment.messages[0].speech;
-                                      res.status(200).json(resultChat);
-                                    }
-                                  });
-                                }
-                              });
-                            } else {
-                              list.save(function(err) {
-                                if (err) {
-                                  console.log(err);
-                                  res.status(500).json({
-                                    message: "Internal Server Error: DB error"
-                                  });
-                                } else {
-                                  resultChat.obj = list;
-                                  resultChat.text = response.result.fulfillment.messages[0].speech;
-                                  res.status(200).json(resultChat);
-                                }
-                              });
-                            }
-                          }
+                  if (req.body.list_id) {
+                    ShoppingList.findById(req.body.list_id).populate('items').exec(function(err, list) {
+                      if (err) {
+                        console.log(err);
+                        res.status(500).json({
+                          message: "Internal Server Error: DB error"
                         });
-                      } else {
-                        resultChat.text = "Sorry, I can't add more then two items per time";
-                        res.status(200).json(resultChat);
-                      }
-                    } else {
-                      resultChat.text = "Sorry " + user.name + ", I can't do it yet.";
-                      res.status(200).json(resultChat);
-                    }
-                  });
-                  break;
-                case "remove_from_shopping_list":
-									resultChat.model = "remove_item";
-                  ShoppingList.findById(req.body.list_id).populate('items').exec(function(err, list) {
-                    if (err) {
-                      console.log(err);
-                      res.status(500).json({
-                        message: "Internal Server Error: DB error"
-                      });
-                    } else if (list) {
-                      var found = false;
-                      for (i = 0; i < list.items.length; i++) {
-												// console.log(list.items[i].name);
-                        if (list.items[i].name.toLowerCase() == response.result.parameters.grocery_list_item_name[0].toLowerCase()) {
-                          found = true;
-                          var item_id = list.items[i]._id;
-                          ShoppingItem.findById(item_id).exec(function(err, item) {
+                      } else if (list) {
+                        if (response.result.parameters.grocery_list_item_name.length <= 2) {
+                          var item = new ShoppingItem();
+                          var item2;
+                          item.name = response.result.parameters.grocery_list_item_name[0];
+                          item.value = response.result.parameters.grocery_list_item_quantity[0];
+                          item.unit = response.result.parameters.grocery_list_item_unity[0];
+                          if (response.result.parameters.grocery_list_item_name.length > 1) {
+                            item2 = new ShoppingItem();
+                            item2.name = response.result.parameters.grocery_list_item_name[1];
+                            item2.value = response.result.parameters.grocery_list_item_quantity[1];
+                            item2.unit = response.result.parameters.grocery_list_item_unity[1];
+                          }
+                          item.save(function(err) {
                             if (err) {
                               console.log(err);
                               res.status(500).json({
                                 message: "Internal Server Error: DB error"
                               });
-                            } else if (item) {
-                              item.checked = true;
-                              item.save(function(err) {
-                                if (err) {
-                                  console.log(err);
-                                  res.status(500).json({
-                                    message: "Internal Server Error: DB error"
-                                  });
-                                } else {
-                                  resultChat.text = item.name + " checked!";
-                                  res.status(200).json(resultChat);
-                                }
-                              });
+                            } else {
+                              list.items.push(item);
+                              if (response.result.parameters.grocery_list_item_name.length > 1) {
+                                item2.save(function(err) {
+                                  if (err) {
+                                    console.log(err);
+                                    res.status(500).json({
+                                      message: "Internal Server Error: DB error"
+                                    });
+                                  } else {
+                                    list.items.push(item2);
+                                    list.save(function(err) {
+                                      if (err) {
+                                        console.log(err);
+                                        res.status(500).json({
+                                          message: "Internal Server Error: DB error"
+                                        });
+                                      } else {
+                                        resultChat.obj = list;
+                                        resultChat.text = response.result.fulfillment.messages[0].speech;
+                                        res.status(200).json(resultChat);
+                                      }
+                                    });
+                                  }
+                                });
+                              } else {
+                                list.save(function(err) {
+                                  if (err) {
+                                    console.log(err);
+                                    res.status(500).json({
+                                      message: "Internal Server Error: DB error"
+                                    });
+                                  } else {
+                                    resultChat.obj = list;
+                                    resultChat.text = response.result.fulfillment.messages[0].speech;
+                                    res.status(200).json(resultChat);
+                                  }
+                                });
+                              }
                             }
                           });
+                        } else {
+                          resultChat.text = "Sorry, I can't add more then two items per time";
+                          res.status(200).json(resultChat);
                         }
+                      } else {
+                        resultChat.text = "Sorry " + user.name + ", I can't do it yet.";
+                        res.status(200).json(resultChat);
                       }
-                      // if (!found) {
-                      //   resultChat.text = "I couldn't find " + response.result.parameters.grocery_list_item_name[0] + " in your list.";
-                      //   res.status(200).json(resultChat);
-                      // }
-                    } else {
-                      resultChat.text = "Hey " + user.name + ", you don't have a list yet!";
-                      res.status(200).json(resultChat);
-                    }
-                  });
+                    });
+                  } else {
+                    resultChat.text = "Sorry " + user.name + ", you need to activate food section first";
+                    res.status(200).json(resultChat);
+                  }
+                  break;
+                case "remove_from_shopping_list":
+                  resultChat.model = "remove_item";
+                  if (req.body.list_id) {
+                    ShoppingList.findById(req.body.list_id).populate('items').exec(function(err, list) {
+                      if (err) {
+                        console.log(err);
+                        res.status(500).json({
+                          message: "Internal Server Error: DB error"
+                        });
+                      } else if (list) {
+                        var found = false;
+                        for (i = 0; i < list.items.length; i++) {
+                          // console.log(list.items[i].name);
+                          if (list.items[i].name.toLowerCase() == response.result.parameters.grocery_list_item_name[0].toLowerCase()) {
+                            found = true;
+                            var item_id = list.items[i]._id;
+                            ShoppingItem.findById(item_id).exec(function(err, item) {
+                              if (err) {
+                                console.log(err);
+                                res.status(500).json({
+                                  message: "Internal Server Error: DB error"
+                                });
+                              } else if (item) {
+                                item.checked = true;
+                                item.save(function(err) {
+                                  if (err) {
+                                    console.log(err);
+                                    res.status(500).json({
+                                      message: "Internal Server Error: DB error"
+                                    });
+                                  } else {
+                                    resultChat.text = item.name + " checked!";
+                                    res.status(200).json(resultChat);
+                                  }
+                                });
+                              }
+                            });
+                          }
+                        }
+                        // if (!found) {
+                        //   resultChat.text = "I couldn't find " + response.result.parameters.grocery_list_item_name[0] + " in your list.";
+                        //   res.status(200).json(resultChat);
+                        // }
+                      } else {
+                        resultChat.text = "Hey " + user.name + ", you don't have a list yet!";
+                        res.status(200).json(resultChat);
+                      }
+                    });
+                  } else {
+                    resultChat.text = "Hey " + user.name + ", activete food section first!";
+                    res.status(200).json(resultChat);
+                  }
                   break;
                 case "info_list":
                   resultChat.text = response.result.fulfillment.messages[0].speech;
