@@ -201,16 +201,16 @@ router.route('/chat').post(function(req, res) {
                           // console.log(list.items[i].name);
                           if (item.name.toLowerCase() == response.result.parameters.grocery_list_item_name[0].toLowerCase() && !item.checked) {
                             found = true;
-                            var item_id = list.items[i]._id;
-                            ShoppingItem.findById(item_id).exec(function(err, item) {
+                            var item_id = item._id;
+                            ShoppingItem.findById(item_id).exec(function(err, itemFound) {
                               if (err) {
                                 console.log(err);
                                 res.status(500).json({
                                   message: "Internal Server Error: DB error"
                                 });
                               } else if (item) {
-                                item.checked = true;
-                                item.save(function(err) {
+                                itemFound.checked = true;
+                                itemFound.save(function(err) {
                                   if (err) {
                                     console.log(err);
                                     res.status(500).json({
