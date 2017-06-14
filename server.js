@@ -103,7 +103,7 @@ app.use(chatbot_router);
 
 // Chatbot Router
 var admin_router = require('./app/routers/admin_router');
-app.use(admin_router);
+app.use('/admin', admin_router);
 
 //  start server
 app.listen(port);
