@@ -93,7 +93,7 @@ router.route('/notification').post(function(req, res){
 					console.log(err);
 					res.status(500).json({message: "Internal Server Error: DB error"});
 				} else {
-					users.each(function(user){
+					users.forEach(function(user){
 						var note = new apn.Notification();
 						var deviceToken = user.device_token;
 						var badge = 0;
