@@ -352,7 +352,7 @@ router.route('/chat').post(function(req, res) {
                   break;
                 default:
                   // DEFAULT FALLBACK RESPONSES (RANDOM)
-                  resultChat.text = "Sorry " + user.name + ", I'm not sure how to help with that.";
+                  resultChat.text = response.result.fulfillment.messages[0].speech;
                   res.status(200).json(resultChat);
               }
             }
