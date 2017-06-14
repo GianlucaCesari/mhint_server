@@ -60,7 +60,7 @@ router.route('/chat').post(function(req, res) {
         nlp.text(req.body.chat, {
           sessionId: req.body.mail
         }).then(function(response) {
-          // console.log(response);
+          console.log(response);
           var resultChat = {
             text: "",
             model: "",
