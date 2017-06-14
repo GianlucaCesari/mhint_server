@@ -226,10 +226,10 @@ router.route('/chat').post(function(req, res) {
                           }
                           if (ind == array.length - 1) {
                             if (found) {
-                              resultChat.text = response.result.parameters.grocery_list_item_name[0] + " checked!";
+                              resultChat.text = response.result.parameters.grocery_list_item_name[0] + "? Consider it done!";
                               res.status(200).json(resultChat);
                             } else {
-                              resultChat.text = response.result.parameters.grocery_list_item_name[0] + " not found to checked!";
+                              resultChat.text = "I couldn't find any " response.result.parameters.grocery_list_item_name[0] + " to check on your list!";
                               res.status(200).json(resultChat)
                             }
                           }
