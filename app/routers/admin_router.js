@@ -93,7 +93,7 @@ router.route('/notification').post(function(req, res){
 					console.log(err);
 					res.status(500).json({message: "Internal Server Error: DB error"});
 				} else {
-					users.forEach(function(user){
+					users.forEach(function(user, ind, array){
 						var note = new apn.Notification();
 						var deviceToken = user.device_token;
 						var badge = 0;
@@ -133,8 +133,9 @@ router.route('/notification').post(function(req, res){
 							}
 							console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + user.mail + "]");
 						});
-					}).then(function(){
-						res.status(200).json({message: "OK"});
+						if (ind == array.length-1) {
+							res.status(200).json({message: "OK"});
+						}
 					});
 				}
 			});
