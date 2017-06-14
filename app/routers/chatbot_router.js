@@ -325,7 +325,7 @@ router.route('/chat').post(function(req, res) {
                                 console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + nearUser.mail + "]");
                                 // console.log("notification: " + JSON.stringify(result));
                               });
-                              resultChat.text = response.result.fulfillment.messages[0].speech;
+                              resultChat.text = response.result.fulfillment.messages[0].speech+" to "+nearUser.name+".";
                               resultChat.obj = UserNeed;
                               res.status(200).json(resultChat);
                             }
