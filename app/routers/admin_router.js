@@ -34,7 +34,7 @@ var apnProvider2 = new apn.Provider(apnOptions2);
 //  router init
 var router = express.Router();
 
-router.route('/admin/notification').post(function(req, res){
+router.route('/notification').post(function(req, res){
 	if (req.body.access_token == myToken) {
 		if (req.body.mail) {
 			User.findOne({mail: req.body.mail}).exec(function(err, user){
@@ -91,17 +91,17 @@ router.route('/admin/notification').post(function(req, res){
 					console.log(err);
 					res.status(500).json({message: "Internal Server Error: DB error"});
 				} else {
-					for (i = 0; i < users.length; i++) {
+					users.each(function(user){
 						var note = new apn.Notification();
-						var deviceToken = users[i].device_token;
+						var deviceToken = user.device_token;
 						var badge = 0;
-						if (users[i].push_num) {
-							users[i].push_num = users[i].push_num + 1;
+						if (user.push_num) {
+							user.push_num = user.push_num + 1;
 						} else {
-							users[i].push_num = 1;
+							user.push_num = 1;
 						}
-						users[i].save();
-						badge = users[i].push_num;
+						user.save();
+						badge = user.push_num;
 
 						note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
 						note.badge = badge;
@@ -120,7 +120,7 @@ router.route('/admin/notification').post(function(req, res){
 							} else {
 								status = "FAILED";
 							}
-							console.log("[" + date + "][PUSH NOTIFICATION][dev][" + status + "][" + users[i].mail + "]");
+							console.log("[" + date + "][PUSH NOTIFICATION][dev][" + status + "][" + user.mail + "]");
 						});
 						apnProvider2.send(note, deviceToken).then((result) => {
 							var status = "";
@@ -129,9 +129,11 @@ router.route('/admin/notification').post(function(req, res){
 							} else {
 								status = "FAILED";
 							}
-							console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + users[i].mail + "]");
+							console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + user.mail + "]");
 						});
-					}
+					}).then(function(){
+						res.status(200).json({message: "OK"});
+					});
 				}
 			});
 		}
