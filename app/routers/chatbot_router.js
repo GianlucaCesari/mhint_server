@@ -194,7 +194,7 @@ router.route('/chat').post(function(req, res) {
                         var found = false;
                         for (i = 0; i < list.items.length; i++) {
                           // console.log(list.items[i].name);
-                          if (list.items[i].name.toLowerCase() == response.result.parameters.grocery_list_item_name[0].toLowerCase()) {
+                          if (list.items[i].name.toLowerCase() == response.result.parameters.grocery_list_item_name[0].toLowerCase() && !list.items[i].checked) {
                             found = true;
                             var item_id = list.items[i]._id;
                             ShoppingItem.findById(item_id).exec(function(err, item) {
