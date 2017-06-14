@@ -310,7 +310,10 @@ router.route('/requests').get(function(req, res) {
               value: reqs
             });
           } else {
-            res.status(404).json(reqs);
+            res.status(404).json({
+              message: "Not found",
+              value: reqs
+            });
           }
         });
       } else {
