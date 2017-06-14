@@ -101,6 +101,10 @@ app.use(allergenic_diet_router);
 var chatbot_router = require('./app/routers/chatbot_router');
 app.use(chatbot_router);
 
+// Chatbot Router
+var admin_router = require('./app/routers/admin_router');
+app.use('/admin', admin_router);
+
 //  start server
 app.listen(port);
 console.log('Server started on port ' + port);
