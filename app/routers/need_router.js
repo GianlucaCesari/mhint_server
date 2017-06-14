@@ -305,7 +305,10 @@ router.route('/requests').get(function(req, res) {
               message: "Internal Server Error: DB error"
             });
           } else if (reqs.length > 0) {
-            res.status(200).json(reqs);
+            res.status(200).json({
+              message: "OK",
+              value: reqs
+            });
           } else {
             res.status(404).json(reqs);
           }
