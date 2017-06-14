@@ -84,6 +84,8 @@ router.route('/notification').post(function(req, res){
 				} else {
 					res.status(404).json({message: "User not found"});
 				}
+			}).then(function(){
+				res.status(200).json({message: "OK"});
 			});
 		} else {
 			User.find({}).exec(function(err, users){
