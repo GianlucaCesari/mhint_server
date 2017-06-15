@@ -82,8 +82,14 @@ router.route('/chat').post(function(req, res) {
                 case 'check_recipe':
                   resultChat.model = "check_recipe";
                   if (req.body.list_id) {
+										var dateR = response.result.parameters.date;
+										if (dateR != '') {
+											var today = new Date();
+											var on = new Date(dateR);
+											dateR = on.getDate() - today.getDate();
+										}
                     resultChat.obj = {
-                      date: response.result.parameters.date,
+                      date: dateR,
                       type: response.result.parameters.recipe_type
                     };
                     resultChat.text = response.result.fulfillment.messages[0].speech;
