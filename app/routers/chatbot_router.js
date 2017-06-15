@@ -60,7 +60,7 @@ router.route('/chat').post(function(req, res) {
         nlp.text(req.body.chat, {
           sessionId: req.body.mail
         }).then(function(response) {
-          // console.log(response);
+          console.log(response.result);
           var resultChat = {
             text: "",
             model: "",
@@ -89,11 +89,38 @@ router.route('/chat').post(function(req, res) {
                           message: "Internal Server Error: DB error"
                         });
                       } else if (list) {
-                        resultChat.obj = list;
-                        resultChat.text = user.name + ", " + response.result.fulfillment.messages[0].speech;
-                        res.status(200).json(resultChat);
+                        var itemFound;
+                        if (response.result.parameters.grocery_list_item_name.length > 0) {
+                          list.items.forEach(function(item, ind, array) {
+                            if (item.name.toLowerCase() == response.result.parameters.grocery_list_item_name[0].toLowerCase()) {
+                              itemFound = item;
+                            }
+                            if (ind == array.length - 1) {
+                              if (itemFound) {
+                                resultChat.obj = itemFound;
+																var itemName = itemFound.name.charAt(0).toUpperCase() + itemFound.name.slice(1);
+                                if (!itemFound.checked) {
+                                  resultChat.text = "Yes, I found "+itemName + " in your list.";
+                                  res.status(200).json(resultChat);
+                                } else {
+                                  resultChat.text = user.name + ", I think you've already bought " + itemName;
+                                  res.status(200).json(resultChat);
+                                }
+                              } else {
+																var name = response.result.parameters.grocery_list_item_name[0].charAt(0).toUpperCase() + response.result.parameters.grocery_list_item_name[0].slice(1);
+                                resultChat.obj = list;
+                                resultChat.text = "I can't find " +name+" in your list!";
+                                res.status(200).json(resultChat);
+                              }
+                            }
+                          });
+                        } else {
+                          resultChat.obj = list;
+                          resultChat.text = user.name + ", " + response.result.fulfillment.messages[0].speech;
+                          res.status(200).json(resultChat);
+                        }
                       } else {
-                        resultChat.text = user.name + ", " + response.result.fulfillment.messages[0].speech;
+                        resultChat.text = "Hey " + user.name + ", you don't have a list yet!";
                         res.status(200).json(resultChat);
                       }
                     });
@@ -222,12 +249,12 @@ router.route('/chat').post(function(req, res) {
                             });
                           }
                           if (ind == array.length - 1) {
-														var itemName = response.result.parameters.grocery_list_item_name[0].charAt(0).toUpperCase() + response.result.parameters.grocery_list_item_name[0].slice(1);
+                            var itemName = response.result.parameters.grocery_list_item_name[0].charAt(0).toUpperCase() + response.result.parameters.grocery_list_item_name[0].slice(1);
                             if (found) {
-                              resultChat.text =  itemName + "? Consider it done!";
+                              resultChat.text = itemName + "? Consider it done!";
                               res.status(200).json(resultChat);
                             } else {
-                              resultChat.text = "I couldn't find any "+ itemName + " to check on your list!";
+                              resultChat.text = "I couldn't find any " + itemName + " to check on your list!";
                               res.status(200).json(resultChat)
                             }
                           }
