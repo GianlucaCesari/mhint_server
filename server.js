@@ -9,7 +9,8 @@ var express = require('express');
 
 //  app init
 var app = express();
-app.setMaxListeners(0);
+// app.setMaxListeners(0);
+require('events').EventEmitter.defaultMaxListeners = Infinity;
 
 //  require mongoose models
 var AuthApplication = require('./app/models/auth_application');
