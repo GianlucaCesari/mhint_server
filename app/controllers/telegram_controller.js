@@ -175,7 +175,7 @@ module.exports = {
 	                              var responseMsg = item.name + "   " + item.value + " " + unit;
 	                              bot.sendMessage(chatId, responseMsg)
 	                            });
-                            }, 500)
+                            }, 500);
                           }
                         } else {
                           responseMsg = "Sorry " + user.name + ", I can't find your list.";
@@ -236,6 +236,13 @@ module.exports = {
                                           } else {
                                             responseMsg = response.result.fulfillment.messages[0].speech;
                                             bot.sendMessage(chatId, responseMsg);
+																						setTimeout(function() {
+																							list.items.forEach(function(item, ind, array) {
+									                              var unit = item.unit != undefined ? item.unit : "";
+									                              var responseMsg = item.name + "   " + item.value + " " + unit;
+									                              bot.sendMessage(chatId, responseMsg)
+									                            });
+								                            }, 500);
                                           }
                                         });
                                       }
@@ -248,6 +255,13 @@ module.exports = {
                                       } else {
                                         responseMsg = response.result.fulfillment.messages[0].speech;
                                         bot.sendMessage(chatId, responseMsg);
+																				setTimeout(function() {
+																					list.items.forEach(function(item, ind, array) {
+							                              var unit = item.unit != undefined ? item.unit : "";
+							                              var responseMsg = item.name + "   " + item.value + " " + unit;
+							                              bot.sendMessage(chatId, responseMsg)
+							                            });
+						                            }, 500);
                                       }
                                     });
                                   }
