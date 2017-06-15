@@ -81,12 +81,17 @@ router.route('/chat').post(function(req, res) {
                   break;
                 case 'check_recipe':
                   resultChat.model = "check_recipe";
-                  resultChat.obj = {
-                    date: response.result.parameters.date,
-                    type: response.result.parameters.recipe_type
-                  };
-                  resultChat.text = response.result.fulfillment.messages[0].speech;
-                  res.status(200).json(resultChat);
+                  if (req.body.list_id) {
+                    resultChat.obj = {
+                      date: response.result.parameters.date,
+                      type: response.result.parameters.recipe_type
+                    };
+                    resultChat.text = response.result.fulfillment.messages[0].speech;
+                    res.status(200).json(resultChat);
+                  } else {
+										resultChat.text = user.name + ", activate food section first";
+                    res.status(200).json(resultChat);
+                  }
                   break;
                 case "show_grocery_list":
                   resultChat.model = "shopping_list";
@@ -284,7 +289,7 @@ router.route('/chat').post(function(req, res) {
                   break;
                 case "need_action":
                   resultChat.model = "need_action";
-									console.log(req.body);
+                  console.log(req.body);
                   if (req.body.lat != 0 && req.body.long != 0) {
                     var UserNeed = new Need();
                     UserNeed.user_sender = user;
@@ -386,7 +391,7 @@ router.route('/chat').post(function(req, res) {
                       }
                     });
                   } else {
-                    resultChat.text = "Hey " + user.name + ", activete needs section first!";
+                    resultChat.text = "Hey " + user.name + ", activate needs section first!";
                     res.status(200).json(resultChat);
                   }
                   break;
