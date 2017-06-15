@@ -60,7 +60,7 @@ router.route('/chat').post(function(req, res) {
         nlp.text(req.body.chat, {
           sessionId: req.body.mail
         }).then(function(response) {
-          console.log(response.result);
+          // console.log(response.result);
           var resultChat = {
             text: "",
             model: "",
@@ -214,7 +214,7 @@ router.route('/chat').post(function(req, res) {
                   break;
                 case "remove_from_shopping_list":
                   resultChat.model = "remove_item";
-                  console.log(response.result.parameters.grocery_list_item_name[0]);
+                  // console.log(response.result.parameters.grocery_list_item_name[0]);
                   if (req.body.list_id) {
                     ShoppingList.findById(req.body.list_id).populate('items').exec(function(err, list) {
                       if (err) {
