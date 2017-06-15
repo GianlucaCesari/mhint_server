@@ -1,38 +1,13 @@
 //  server.js
 
 //  require modules
-var telegramBot = require('node-telegram-bot-api');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var unirest = require('unirest');
 var express = require('express');
+var telegramController = require('./app/controllers/telegram_controller');
 
-var token = '330058876:AAGnelPoLMBjRuWiuQiFrkTENe54booDYrE';
-// var bot = new telegramBot(token, {polling: true});
-
-// bot.onText(/\/echo (.+)/, (msg, match) => {
-//   // 'msg' is the received Message from Telegram
-//   // 'match' is the result of executing the regexp above on the text content
-//   // of the message
-//
-//   var chatId = msg.chat.id;
-//   var resp = match[1]; // the captured "whatever"
-//
-//   // send back the matched "whatever" to the chat
-//   bot.sendMessage(chatId, resp);
-// });
-
-// Listen for any kind of message. There are different kinds of
-// messages.
-// bot.on('message', (msg) => {
-//   var chatId = msg.chat.id;
-// 	var telegram_id = msg.from.id;
-//
-// 	console.log(msg);
-//
-//   // send a message to the chat acknowledging receipt of their message
-//   bot.sendMessage(chatId, 'Received your message');
-// });
+telegramController.init();
 
 //  app init
 var app = express();
