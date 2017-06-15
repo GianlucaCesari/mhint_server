@@ -129,7 +129,7 @@ router.route('/chat').post(function(req, res) {
                               } else {
                                 var name = response.result.parameters.grocery_list_item_name[0].charAt(0).toUpperCase() + response.result.parameters.grocery_list_item_name[0].slice(1);
                                 resultChat.obj = list;
-                                resultChat.text = "I can't find " + name + " in your list!";
+                                resultChat.text = "I can't find any " + name + " on your list!";
                                 res.status(200).json(resultChat);
                               }
                             }
@@ -219,7 +219,7 @@ router.route('/chat').post(function(req, res) {
                             }
                           });
                         } else {
-                          resultChat.text = "Sorry, I can't add more then two items per time";
+                          resultChat.text = "Sorry, I can't add more than two items per time";
                           res.status(200).json(resultChat);
                         }
                       } else {
@@ -285,7 +285,7 @@ router.route('/chat').post(function(req, res) {
                       }
                     });
                   } else {
-                    resultChat.text = "Hey " + user.name + ", activete food section first!";
+                    resultChat.text = "Hey " + user.name + ", activate food section first!";
                     res.status(200).json(resultChat);
                   }
                   break;
@@ -387,12 +387,12 @@ router.route('/chat').post(function(req, res) {
                               }
                             });
                           } else {
-                            resultChat.text = "Sorry " + user.name + ", I can't find available pepole!";
+                            resultChat.text = "Sorry " + user.name + ", I can't find anybody available right now!";
                             res.status(200).json(resultChat);
                           }
                         });
                       } else {
-                        resultChat.text = "Sorry " + user.name + ", I can't find available pepole!";
+                        resultChat.text = "Sorry " + user.name + ", I can't find anybody available right now!";
                         res.status(200).json(resultChat);
                       }
                     });

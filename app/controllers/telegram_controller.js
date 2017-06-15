@@ -47,7 +47,7 @@ module.exports = {
       var responseMsg = "Error";
 
       if (msg.text === "/start") {
-        responseMsg = "Hi " + msg.from.first_name + ", this is your code for Mhint application: " + telegram_id;
+        responseMsg = "Hi " + msg.from.first_name + ", this is your code to insert into the Mhint app: " + telegram_id;
         bot.sendMessage(chatId, responseMsg);
       } else {
         User.findOne({
@@ -76,7 +76,7 @@ module.exports = {
                       bot.sendMessage(chatId, responseMsg);
                       break;
                     case 'check_recipe':
-                      responseMsg = "Sorry " + user.name + ", I can't help you with that yet.";
+                      responseMsg = "Sorry " + user.name + ", I can't help you with that... yet!";
                       bot.sendMessage(chatId, responseMsg);
                       break;
                     case "remove_from_shopping_list":
@@ -161,7 +161,7 @@ module.exports = {
                                   }
                                 } else {
                                   var name = response.result.parameters.grocery_list_item_name[0].charAt(0).toUpperCase() + response.result.parameters.grocery_list_item_name[0].slice(1);
-                                  responseMsg = "I can't find " + name + " in your list!";
+                                  responseMsg = "I can't find any " + name + " on your list!";
                                   bot.sendMessage(chatId, responseMsg);
                                 }
                               }
@@ -247,7 +247,7 @@ module.exports = {
                                 }
                               });
                             } else {
-                              responseMsg = "Sorry, I can't add more then two items per time";
+                              responseMsg = "Sorry, I can't add more than two items per time";
                               bot.sendMessage(chatId, responseMsg);
                             }
                           });
@@ -342,17 +342,17 @@ module.exports = {
                                 }
                               });
                             } else {
-                              responseMsg = "Sorry " + user.name + ", I can't find available pepole!";
+                              responseMsg = "Sorry " + user.name + ", I can't find anybody available right now!";
                               bot.sendMessage(chatId, responseMsg);
                             }
                           });
                         } else {
-                          rresponseMsg = "Sorry " + user.name + ", I can't find available pepole!";
+                          rresponseMsg = "Sorry " + user.name + ", I can't find anybody available right now!";
                           bot.sendMessage(chatId, responseMsg);
                         }
                       });
 										} else {
-											responseMsg = "Sorry " + user.name + ", I can't help you for that without your position.";
+											responseMsg = "Sorry " + user.name + ", I can't help you with that without your position.";
                       bot.sendMessage(chatId, responseMsg);
 										}
                       break;
@@ -367,7 +367,7 @@ module.exports = {
               }
             });
           } else {
-            responseMsg = "Sorry " + msg.from.first_name + ", I don't remember you";
+            responseMsg = "Sorry " + msg.from.first_name + ", I don't know you, what about you go to settings in the Mhint app?";
             bot.sendMessage(chatId, responseMsg);
           }
         });
