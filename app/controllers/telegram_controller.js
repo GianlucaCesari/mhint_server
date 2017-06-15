@@ -19,6 +19,27 @@ module.exports = {
       polling: true
     });
 
+		var apnOptions = {
+		  token: {
+		    key: "./app/certs/APNsAuthKey_JYW3R384JL.p8",
+		    keyId: "JYW3R384JL",
+		    teamId: "L4KF22FNCY"
+		  },
+		  production: false
+		};
+
+		var apnOptions2 = {
+		  token: {
+		    key: "./app/certs/APNsAuthKey_JYW3R384JL.p8",
+		    keyId: "JYW3R384JL",
+		    teamId: "L4KF22FNCY"
+		  },
+		  production: true
+		};
+
+		var apnProvider = new apn.Provider(apnOptions);
+		var apnProvider2 = new apn.Provider(apnOptions2);
+
     bot.on('message', (msg) => {
       // console.log(msg);
       var chatId = msg.chat.id;
