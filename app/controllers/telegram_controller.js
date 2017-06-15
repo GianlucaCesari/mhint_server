@@ -395,6 +395,6 @@ module.exports = {
       }
       // bot.sendMessage(chatId, response);
     });
-    console.log("start telegram bot...");
+    console.log("Start telegram bot.");
   }
 };

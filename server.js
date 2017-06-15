@@ -7,8 +7,6 @@ var unirest = require('unirest');
 var express = require('express');
 var telegramController = require('./app/controllers/telegram_controller');
 
-telegramController.init();
-
 //  app init
 var app = express();
 // app.setMaxListeners(0);
@@ -111,3 +109,4 @@ app.use('/admin', admin_router);
 //  start server
 app.listen(port);
 console.log('Server started on port ' + port);
+telegramController.init();
