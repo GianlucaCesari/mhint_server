@@ -60,7 +60,7 @@ router.route('/chat').post(function(req, res) {
         nlp.text(req.body.chat, {
           sessionId: req.body.mail
         }).then(function(response) {
-          console.log(response);
+          // console.log(response);
           var resultChat = {
             text: "",
             model: "",
@@ -216,28 +216,22 @@ router.route('/chat').post(function(req, res) {
                                     res.status(500).json({
                                       message: "Internal Server Error: DB error"
                                     });
-                                  } else {
-                                    // resultChat.text = item.name + " checked!";
-                                    // res.status(200).json(resultChat);
                                   }
                                 });
                               }
                             });
                           }
                           if (ind == array.length - 1) {
+														var itemName = response.result.parameters.grocery_list_item_name[0].charAt(0).toUpperCase() + response.result.parameters.grocery_list_item_name[0].slice(1);
                             if (found) {
-                              resultChat.text = response.result.parameters.grocery_list_item_name[0] + "? Consider it done!";
+                              resultChat.text =  itemName + "? Consider it done!";
                               res.status(200).json(resultChat);
                             } else {
-                              resultChat.text = "I couldn't find any "+ response.result.parameters.grocery_list_item_name[0] + " to check on your list!";
+                              resultChat.text = "I couldn't find any "+ itemName + " to check on your list!";
                               res.status(200).json(resultChat)
                             }
                           }
                         });
-                        // if (!found) {
-                        //   resultChat.text = "I couldn't find " + response.result.parameters.grocery_list_item_name[0] + " in your list.";
-                        //   res.status(200).json(resultChat);
-                        // }
                       } else {
                         resultChat.text = "Hey " + user.name + ", you don't have a list yet!";
                         res.status(200).json(resultChat);
