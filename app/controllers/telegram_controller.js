@@ -171,7 +171,7 @@ module.exports = {
                             bot.sendMessage(chatId, responseMsg);
 														list.items.forEach(function(item, ind, array) {
 															console.log(item);
-															var responseMsg = item.name + "   " + item.value ? item.value : "" + " " + item.unit ? item.unit : "";
+															var responseMsg = item.name + "   " + item.value + " " + item.unit ;
 															bot.sendMessage(chatId, responseMsg)
 														});
                           }
