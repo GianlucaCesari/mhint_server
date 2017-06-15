@@ -169,6 +169,10 @@ module.exports = {
                           } else {
                             responseMsg = user.name + ", " + response.result.fulfillment.messages[0].speech;
                             bot.sendMessage(chatId, responseMsg);
+														list.items.forEach(function(item, ind, array) {
+															let response = item.name + "   " + item.value ? item.value : "" + " " + item.unit ? item.unit : ""; 
+															bot.sendMessage(chatId, response)
+														});
                           }
                         } else {
                           responseMsg = "Sorry " + user.name + ", I can't find your list.";
