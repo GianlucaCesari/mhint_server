@@ -386,7 +386,7 @@ router.route('/chat').post(function(req, res) {
                       }
                     });
                   } else {
-                    esultChat.text = "Hey " + user.name + ", activete needs section first!";
+                    resultChat.text = "Hey " + user.name + ", activete needs section first!";
                     res.status(200).json(resultChat);
                   }
                   break;
