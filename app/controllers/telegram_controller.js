@@ -10,8 +10,8 @@ module.exports = {
     //require mongoose models
     var ShoppingList = require('../models/shopping_list');
     var ShoppingItem = require('../models/shopping_item');
-		var UserPosition = require('../models/user_position');
-		var Need = require('../models/need');
+    var UserPosition = require('../models/user_position');
+    var Need = require('../models/need');
     var User = require('../models/user');
 
     var token = '330058876:AAGnelPoLMBjRuWiuQiFrkTENe54booDYrE';
@@ -19,26 +19,26 @@ module.exports = {
       polling: true
     });
 
-		var apnOptions = {
-		  token: {
-		    key: "./app/certs/APNsAuthKey_JYW3R384JL.p8",
-		    keyId: "JYW3R384JL",
-		    teamId: "L4KF22FNCY"
-		  },
-		  production: false
-		};
+    var apnOptions = {
+      token: {
+        key: "./app/certs/APNsAuthKey_JYW3R384JL.p8",
+        keyId: "JYW3R384JL",
+        teamId: "L4KF22FNCY"
+      },
+      production: false
+    };
 
-		var apnOptions2 = {
-		  token: {
-		    key: "./app/certs/APNsAuthKey_JYW3R384JL.p8",
-		    keyId: "JYW3R384JL",
-		    teamId: "L4KF22FNCY"
-		  },
-		  production: true
-		};
+    var apnOptions2 = {
+      token: {
+        key: "./app/certs/APNsAuthKey_JYW3R384JL.p8",
+        keyId: "JYW3R384JL",
+        teamId: "L4KF22FNCY"
+      },
+      production: true
+    };
 
-		var apnProvider = new apn.Provider(apnOptions);
-		var apnProvider2 = new apn.Provider(apnOptions2);
+    var apnProvider = new apn.Provider(apnOptions);
+    var apnProvider2 = new apn.Provider(apnOptions2);
 
     bot.on('message', (msg) => {
       // console.log(msg);
@@ -169,11 +169,13 @@ module.exports = {
                           } else {
                             responseMsg = user.name + ", " + response.result.fulfillment.messages[0].speech;
                             bot.sendMessage(chatId, responseMsg);
-														list.items.forEach(function(item, ind, array) {
-															console.log(item);
-															var responseMsg = item.name + "   " + item.value + " " + item.unit ;
-															bot.sendMessage(chatId, responseMsg)
-														});
+                            setTimeout(function() {
+															list.items.forEach(function(item, ind, array) {
+	                              var unit = item.unit != undefined ? item.unit : "";
+	                              var responseMsg = item.name + "   " + item.value + " " + unit;
+	                              bot.sendMessage(chatId, responseMsg)
+	                            });
+                            }, 500)
                           }
                         } else {
                           responseMsg = "Sorry " + user.name + ", I can't find your list.";
@@ -263,103 +265,103 @@ module.exports = {
                       });
                       break;
                     case "need_action":
-											if (user.last_position) {
-                      var UserNeed = new Need();
-                      UserNeed.user_sender = user;
-                      UserNeed.name = response.result.parameters.need_subject;
-                      UserNeed.description = "";
-                      // var needCoordinates = [parseFloat(req.body.lat), parseFloat(req.body.long)];
-                      UserNeed.display_position.lat = user.last_position.position.coordinates[0];
-                      UserNeed.display_position.long = user.last_position.position.coordinates[1];
-                      UserNeed.request_position.coordinates = user.last_position.position.coordinates;
-                      var last24h = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
-                      UserPosition.findOne({
-                        is_last: true,
-                        position: {
-                          $geoNear: {
-                            type: "Point",
-                            coordinates: user.last_position.position.coordinates
-                          }
-                        },
-                        user_id: {
-                          $nin: user._id
-                        },
-                        created_at: {
-                          "$gte": last24h
-                        }
-                      }).exec(function(err, pos) {
-                        if (err) {
-													console.log(err);
-													bot.sendMessage(chatId, responseMsg);
-                        } else if (pos) {
-                          User.findById(pos.user_id).exec(function(err, nearUser) {
-                            if (err) {
-															console.log(err);
-															bot.sendMessage(chatId, responseMsg);
-                            } else if (nearUser) {
-                              UserNeed.user_receiver = nearUser;
-                              UserNeed.save(function(err) {
-                                if (err) {
-																	console.log(err);
-																	bot.sendMessage(chatId, responseMsg);
-                                } else {
-                                  var note = new apn.Notification();
-                                  var deviceToken = nearUser.device_token;
-                                  var badge = 0;
-                                  if (nearUser.push_num) {
-                                    nearUser.push_num = nearUser.push_num + 1;
-                                  } else {
-                                    nearUser.push_num = 1;
-                                  }
-                                  nearUser.save();
-                                  badge = nearUser.push_num;
-
-                                  note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
-                                  note.badge = badge;
-                                  note.sound = "ping.aiff";
-                                  note.alert = "Hey " + nearUser.name + ", " + user.name + " needs: " + UserNeed.name + "!\nWill you help him?";
-                                  note.payload = {
-                                    'user': UserNeed.name,
-                                    'text': user.name + " needs: " + UserNeed.name + "!\nWill you help him?"
-                                  };
-                                  note.topic = "com.gianlucacesari.Mhint";
-                                  var date = new Date();
-                                  apnProvider.send(note, deviceToken).then((result) => {
-                                    var status = "";
-                                    if (result.sent.length > 0) {
-                                      status = "SENT";
-                                    } else {
-                                      status = "FAILED";
-                                    }
-                                    console.log("[" + date + "][PUSH NOTIFICATION][dev][" + status + "][" + nearUser.mail + "]");
-                                  });
-                                  apnProvider2.send(note, deviceToken).then((result) => {
-                                    var status = "";
-                                    if (result.sent.length > 0) {
-                                      status = "SENT";
-                                    } else {
-                                      status = "FAILED";
-                                    }
-                                    console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + nearUser.mail + "]");
-                                  });
-                                  responseMsg = response.result.fulfillment.messages[0].speech + " " + nearUser.name + ".";
-                                  bot.sendMessage(chatId, responseMsg);
-                                }
-                              });
-                            } else {
-                              responseMsg = "Sorry " + user.name + ", I can't find anybody available right now!";
-                              bot.sendMessage(chatId, responseMsg);
+                      if (user.last_position) {
+                        var UserNeed = new Need();
+                        UserNeed.user_sender = user;
+                        UserNeed.name = response.result.parameters.need_subject;
+                        UserNeed.description = "";
+                        // var needCoordinates = [parseFloat(req.body.lat), parseFloat(req.body.long)];
+                        UserNeed.display_position.lat = user.last_position.position.coordinates[0];
+                        UserNeed.display_position.long = user.last_position.position.coordinates[1];
+                        UserNeed.request_position.coordinates = user.last_position.position.coordinates;
+                        var last24h = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
+                        UserPosition.findOne({
+                          is_last: true,
+                          position: {
+                            $geoNear: {
+                              type: "Point",
+                              coordinates: user.last_position.position.coordinates
                             }
-                          });
-                        } else {
-                          rresponseMsg = "Sorry " + user.name + ", I can't find anybody available right now!";
-                          bot.sendMessage(chatId, responseMsg);
-                        }
-                      });
-										} else {
-											responseMsg = "Sorry " + user.name + ", I can't help you with that without your position.";
-                      bot.sendMessage(chatId, responseMsg);
-										}
+                          },
+                          user_id: {
+                            $nin: user._id
+                          },
+                          created_at: {
+                            "$gte": last24h
+                          }
+                        }).exec(function(err, pos) {
+                          if (err) {
+                            console.log(err);
+                            bot.sendMessage(chatId, responseMsg);
+                          } else if (pos) {
+                            User.findById(pos.user_id).exec(function(err, nearUser) {
+                              if (err) {
+                                console.log(err);
+                                bot.sendMessage(chatId, responseMsg);
+                              } else if (nearUser) {
+                                UserNeed.user_receiver = nearUser;
+                                UserNeed.save(function(err) {
+                                  if (err) {
+                                    console.log(err);
+                                    bot.sendMessage(chatId, responseMsg);
+                                  } else {
+                                    var note = new apn.Notification();
+                                    var deviceToken = nearUser.device_token;
+                                    var badge = 0;
+                                    if (nearUser.push_num) {
+                                      nearUser.push_num = nearUser.push_num + 1;
+                                    } else {
+                                      nearUser.push_num = 1;
+                                    }
+                                    nearUser.save();
+                                    badge = nearUser.push_num;
+
+                                    note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
+                                    note.badge = badge;
+                                    note.sound = "ping.aiff";
+                                    note.alert = "Hey " + nearUser.name + ", " + user.name + " needs: " + UserNeed.name + "!\nWill you help him?";
+                                    note.payload = {
+                                      'user': UserNeed.name,
+                                      'text': user.name + " needs: " + UserNeed.name + "!\nWill you help him?"
+                                    };
+                                    note.topic = "com.gianlucacesari.Mhint";
+                                    var date = new Date();
+                                    apnProvider.send(note, deviceToken).then((result) => {
+                                      var status = "";
+                                      if (result.sent.length > 0) {
+                                        status = "SENT";
+                                      } else {
+                                        status = "FAILED";
+                                      }
+                                      console.log("[" + date + "][PUSH NOTIFICATION][dev][" + status + "][" + nearUser.mail + "]");
+                                    });
+                                    apnProvider2.send(note, deviceToken).then((result) => {
+                                      var status = "";
+                                      if (result.sent.length > 0) {
+                                        status = "SENT";
+                                      } else {
+                                        status = "FAILED";
+                                      }
+                                      console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + nearUser.mail + "]");
+                                    });
+                                    responseMsg = response.result.fulfillment.messages[0].speech + " " + nearUser.name + ".";
+                                    bot.sendMessage(chatId, responseMsg);
+                                  }
+                                });
+                              } else {
+                                responseMsg = "Sorry " + user.name + ", I can't find anybody available right now!";
+                                bot.sendMessage(chatId, responseMsg);
+                              }
+                            });
+                          } else {
+                            rresponseMsg = "Sorry " + user.name + ", I can't find anybody available right now!";
+                            bot.sendMessage(chatId, responseMsg);
+                          }
+                        });
+                      } else {
+                        responseMsg = "Sorry " + user.name + ", I can't help you with that without your position.";
+                        bot.sendMessage(chatId, responseMsg);
+                      }
                       break;
                     default:
                       responseMsg = response.result.fulfillment.messages[0].speech;
