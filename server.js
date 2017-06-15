@@ -8,7 +8,7 @@ var unirest = require('unirest');
 var express = require('express');
 
 var token = '330058876:AAGnelPoLMBjRuWiuQiFrkTENe54booDYrE';
-var bot = new telegramBot(token, {polling: true});
+// var bot = new telegramBot(token, {polling: true});
 
 // bot.onText(/\/echo (.+)/, (msg, match) => {
 //   // 'msg' is the received Message from Telegram
@@ -24,15 +24,15 @@ var bot = new telegramBot(token, {polling: true});
 
 // Listen for any kind of message. There are different kinds of
 // messages.
-bot.on('message', (msg) => {
-  var chatId = msg.chat.id;
-	var telegram_id = msg.from.id;
-	
-	console.log(msg);
-
-  // send a message to the chat acknowledging receipt of their message
-  bot.sendMessage(chatId, 'Received your message');
-});
+// bot.on('message', (msg) => {
+//   var chatId = msg.chat.id;
+// 	var telegram_id = msg.from.id;
+//
+// 	console.log(msg);
+//
+//   // send a message to the chat acknowledging receipt of their message
+//   bot.sendMessage(chatId, 'Received your message');
+// });
 
 //  app init
 var app = express();
