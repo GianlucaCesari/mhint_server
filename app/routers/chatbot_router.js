@@ -80,10 +80,13 @@ router.route('/chat').post(function(req, res) {
                   res.status(200).json(resultChat);
                   break;
                 case 'check_recipe':
-									resultChat.model = "check_recipe";
-									resultChat.obj = {date: response.result.parameters.date, type: response.result.parameters.recipe_type};
-									resultChat.text = response.result.fulfillment.messages[0].speech;
-									res.status(200).json(resultChat);
+                  resultChat.model = "check_recipe";
+                  resultChat.obj = {
+                    date: response.result.parameters.date,
+                    type: response.result.parameters.recipe_type
+                  };
+                  resultChat.text = response.result.fulfillment.messages[0].speech;
+                  res.status(200).json(resultChat);
                   break;
                 case "show_grocery_list":
                   resultChat.model = "shopping_list";
@@ -281,112 +284,115 @@ router.route('/chat').post(function(req, res) {
                   break;
                 case "need_action":
                   resultChat.model = "need_action";
-                  var UserNeed = new Need();
-                  UserNeed.user_sender = user;
-                  UserNeed.name = response.result.parameters.need_subject;
-                  UserNeed.description = "";
-                  var needCoordinates = [parseFloat(req.body.lat), parseFloat(req.body.long)];
-                  UserNeed.display_position.lat = parseFloat(req.body.lat);
-                  UserNeed.display_position.long = parseFloat(req.body.long);
-                  UserNeed.request_position.coordinates = needCoordinates;
-                  var last24h = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
-                  UserPosition.findOne({
-                    is_last: true,
-                    position: {
-                      $geoNear: {
-                        type: "Point",
-                        coordinates: needCoordinates
-                      }
-                    },
-                    user_id: {
-                      $nin: user._id
-                    },
-                    created_at: {
-                      "$gte": last24h
-                    }
-                  }).exec(function(err, pos) {
-                    if (err) {
-                      console.log(err);
-                      res.status(500).json({
-                        message: "Internal Server Error: DB error"
-                      });
-                    } else if (pos) {
-                      User.findById(pos.user_id).exec(function(err, nearUser) {
-                        if (err) {
-                          console.log(err);
-                          res.status(500).json({
-                            message: "Internal Server Error: DB error"
-                          });
-                        } else if (nearUser) {
-                          UserNeed.user_receiver = nearUser;
-                          UserNeed.save(function(err) {
-                            if (err) {
-                              console.log(err);
-                              res.status(500).json({
-                                message: "Internal Server Error: DB error"
-                              });
-                            } else {
-                              var note = new apn.Notification();
-                              var deviceToken = nearUser.device_token;
-                              var badge = 0;
-                              if (nearUser.push_num) {
-                                nearUser.push_num = nearUser.push_num + 1;
-                              } else {
-                                nearUser.push_num = 1;
-                              }
-                              nearUser.save();
-                              badge = nearUser.push_num;
-
-                              note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
-                              note.badge = badge;
-                              note.sound = "ping.aiff";
-                              note.alert = "Hey " + nearUser.name + ", " + user.name + " needs: " + UserNeed.name + "!\nWill you help him?";
-                              note.payload = {
-                                'user': UserNeed.name,
-                                'text': user.name + " needs: " + UserNeed.name + "!\nWill you help him?"
-                              };
-                              note.topic = "com.gianlucacesari.Mhint";
-                              var date = new Date();
-                              apnProvider.send(note, deviceToken).then((result) => {
-                                var status = "";
-                                if (result.sent.length > 0) {
-                                  status = "SENT";
-                                } else {
-                                  status = "FAILED";
-                                }
-                                console.log("[" + date + "][PUSH NOTIFICATION][dev][" + status + "][" + nearUser.mail + "]");
-                                // console.log("notification: " + JSON.stringify(result));
-                              });
-                              apnProvider2.send(note, deviceToken).then((result) => {
-                                var status = "";
-                                if (result.sent.length > 0) {
-                                  status = "SENT";
-                                } else {
-                                  status = "FAILED";
-                                }
-                                console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + nearUser.mail + "]");
-                                // console.log("notification: " + JSON.stringify(result));
-                              });
-                              resultChat.text = response.result.fulfillment.messages[0].speech + " " + nearUser.name + ".";
-                              resultChat.obj = UserNeed;
-                              res.status(200).json(resultChat);
-                            }
-                          });
-                        } else {
-                          resultChat.text = "Sorry " + user.name + ", I can't find available pepole!";
-                          res.status(200).json(resultChat);
+									console.log(req.body);
+                  if (req.body.lat != 0 && req.body.long != 0) {
+                    var UserNeed = new Need();
+                    UserNeed.user_sender = user;
+                    UserNeed.name = response.result.parameters.need_subject;
+                    UserNeed.description = "";
+                    var needCoordinates = [parseFloat(req.body.lat), parseFloat(req.body.long)];
+                    UserNeed.display_position.lat = parseFloat(req.body.lat);
+                    UserNeed.display_position.long = parseFloat(req.body.long);
+                    UserNeed.request_position.coordinates = needCoordinates;
+                    var last24h = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
+                    UserPosition.findOne({
+                      is_last: true,
+                      position: {
+                        $geoNear: {
+                          type: "Point",
+                          coordinates: needCoordinates
                         }
-                      });
-                    } else {
-                      resultChat.text = "Sorry " + user.name + ", I can't find available pepole!";
-                      res.status(200).json(resultChat);
-                    }
-                  });
-                  // resultChat = response.result.fulfillment.messages[0].speech;
+                      },
+                      user_id: {
+                        $nin: user._id
+                      },
+                      created_at: {
+                        "$gte": last24h
+                      }
+                    }).exec(function(err, pos) {
+                      if (err) {
+                        console.log(err);
+                        res.status(500).json({
+                          message: "Internal Server Error: DB error"
+                        });
+                      } else if (pos) {
+                        User.findById(pos.user_id).exec(function(err, nearUser) {
+                          if (err) {
+                            console.log(err);
+                            res.status(500).json({
+                              message: "Internal Server Error: DB error"
+                            });
+                          } else if (nearUser) {
+                            UserNeed.user_receiver = nearUser;
+                            UserNeed.save(function(err) {
+                              if (err) {
+                                console.log(err);
+                                res.status(500).json({
+                                  message: "Internal Server Error: DB error"
+                                });
+                              } else {
+                                var note = new apn.Notification();
+                                var deviceToken = nearUser.device_token;
+                                var badge = 0;
+                                if (nearUser.push_num) {
+                                  nearUser.push_num = nearUser.push_num + 1;
+                                } else {
+                                  nearUser.push_num = 1;
+                                }
+                                nearUser.save();
+                                badge = nearUser.push_num;
+
+                                note.expiry = Math.floor(Date.now() / 1000) + 3600; // Expires 1 hour from now.
+                                note.badge = badge;
+                                note.sound = "ping.aiff";
+                                note.alert = "Hey " + nearUser.name + ", " + user.name + " needs: " + UserNeed.name + "!\nWill you help him?";
+                                note.payload = {
+                                  'user': UserNeed.name,
+                                  'text': user.name + " needs: " + UserNeed.name + "!\nWill you help him?"
+                                };
+                                note.topic = "com.gianlucacesari.Mhint";
+                                var date = new Date();
+                                apnProvider.send(note, deviceToken).then((result) => {
+                                  var status = "";
+                                  if (result.sent.length > 0) {
+                                    status = "SENT";
+                                  } else {
+                                    status = "FAILED";
+                                  }
+                                  console.log("[" + date + "][PUSH NOTIFICATION][dev][" + status + "][" + nearUser.mail + "]");
+                                });
+                                apnProvider2.send(note, deviceToken).then((result) => {
+                                  var status = "";
+                                  if (result.sent.length > 0) {
+                                    status = "SENT";
+                                  } else {
+                                    status = "FAILED";
+                                  }
+                                  console.log("[" + date + "][PUSH NOTIFICATION][prod][" + status + "][" + nearUser.mail + "]");
+                                });
+                                resultChat.text = response.result.fulfillment.messages[0].speech + " " + nearUser.name + ".";
+                                resultChat.obj = UserNeed;
+                                res.status(200).json(resultChat);
+                              }
+                            });
+                          } else {
+                            resultChat.text = "Sorry " + user.name + ", I can't find available pepole!";
+                            res.status(200).json(resultChat);
+                          }
+                        });
+                      } else {
+                        resultChat.text = "Sorry " + user.name + ", I can't find available pepole!";
+                        res.status(200).json(resultChat);
+                      }
+                    });
+                  } else {
+                    esultChat.text = "Hey " + user.name + ", activete needs section first!";
+                    res.status(200).json(resultChat);
+                  }
                   break;
                 case "remind_grocery_shopping": //NSFW
-
-                  resultChat = response.result.fulfillment.messages[0].speech;
+                  resultChat.text = "Sorry " + user.name + ", I'm not sure how to help with that.";
+                  res.status(200).json(resultChat);
                   break;
                 default:
                   // DEFAULT FALLBACK RESPONSES (RANDOM)
