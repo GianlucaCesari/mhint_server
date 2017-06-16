@@ -3,7 +3,10 @@
 //  require modules
 var express = require('express');
 var unirest = require('unirest');
+var Graph = require('../libs/Graph');
 var myToken = "0z1Po89d11REJ";
+
+var graph = new Graph.Graph();
 
 //  require mongoose models
 var UserPreference = require('../models/user_preference');
