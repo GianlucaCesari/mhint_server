@@ -13,10 +13,10 @@ var User = require('../models/user');
 var router = express.Router();
 
 var apnOptions = {
-  token: {
-    key: "./app/certs/APNsAuthKey_JYW3R384JL.p8",
-    keyId: "JYW3R384JL",
-    teamId: "L4KF22FNCY"
+	token: {
+    key: "./app/certs/AuthKey_XTDAVUTBAE.p8",
+    keyId: "XTDAVUTBAE",
+    teamId: "UP3WTPS4QK"
   },
   production: false
 };
